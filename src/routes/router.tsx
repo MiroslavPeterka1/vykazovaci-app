@@ -1,6 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import { AppShell } from '../components/AppShell';
+import { CustomerDetailPage } from '../pages/CustomerDetailPage';
+import { CustomersPage } from '../pages/CustomersPage';
 import { LoginPage } from '../pages/LoginPage';
 import { PlaceholderPage } from '../pages/PlaceholderPage';
 import { RequireAuth } from './RequireAuth';
@@ -16,8 +18,8 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: '/prehled', element: <PlaceholderPage title="Přehled" /> },
-          { path: '/zakaznici', element: <PlaceholderPage title="Zákazníci" /> },
-          { path: '/zakaznici/:id', element: <PlaceholderPage title="Detail zákazníka" /> },
+          { path: '/zakaznici', element: <CustomersPage /> },
+          { path: '/zakaznici/:id', element: <CustomerDetailPage /> },
           { path: '/profil', element: <PlaceholderPage title="Uživatelský profil" /> },
         ],
       },

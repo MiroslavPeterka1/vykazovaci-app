@@ -8,6 +8,7 @@ import {
   matchesText,
   page,
   pageRangeLabel,
+  sortCustomersByName,
 } from './filters';
 import { fromDateTimeLocalValue } from './time';
 import type { Activity, Customer } from './types';
@@ -133,5 +134,25 @@ describe('stránkování', () => {
     expect(pageRangeLabel(23, 0, 10)).toBe('1–10 z 23');
     expect(pageRangeLabel(23, 2, 10)).toBe('21–23 z 23');
     expect(pageRangeLabel(0, 0, 10)).toBe('0 z 0');
+  });
+});
+
+describe('sortCustomersByName', () => {
+  it('řadí česky, ne podle bajtů UTF-8', () => {
+    const names = ['Zenit Reality', 'Čermák Media', 'Alfatech', 'Dravec Group'];
+    const sorted = sortCustomersByName(names.map((name, i) => customer({ id: `c${i}`, name })));
+    // Podle bajtů by Čermák skončil až za Zenitem.
+    expect(sorted.map((c) => c.name)).toEqual([
+      'Alfatech',
+      'Čermák Media',
+      'Dravec Group',
+      'Zenit Reality',
+    ]);
+  });
+
+  it('nemění vstupní pole', () => {
+    const input = [customer({ id: 'b', name: 'B' }), customer({ id: 'a', name: 'A' })];
+    sortCustomersByName(input);
+    expect(input.map((c) => c.name)).toEqual(['B', 'A']);
   });
 });

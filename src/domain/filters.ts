@@ -19,6 +19,17 @@ export function matchesText(haystack: string, needle: string): boolean {
   return normalize(haystack).includes(normalize(trimmed));
 }
 
+/**
+ * České řazení. Firestore řadí podle bajtů UTF-8, takže „Čermák“ by skončil
+ * až za „Zenit“ — háčky a čárky mají vyšší kódy než celá základní abeceda.
+ * Zákazníky máme stejně celé na klientovi, takže se řadí až tady.
+ */
+const czechCollator = new Intl.Collator('cs', { sensitivity: 'base', numeric: true });
+
+export function sortCustomersByName(customers: Customer[]): Customer[] {
+  return [...customers].sort((a, b) => czechCollator.compare(a.name, b.name));
+}
+
 export interface CustomerFilters {
   /** Fulltext nad všemi atributy zákazníka, včetně těch, které nejsou ve sloupcích. */
   fulltext: string;
