@@ -124,10 +124,16 @@ export function RecordList<T>({
   );
 }
 
-/** Buňka s číslem, časem nebo dobou — návrh je má všude monospace. */
+/**
+ * Buňka s číslem, časem nebo dobou — návrh je má všude monospace a na jednom
+ * řádku. Kdyby se datum lámalo, řádky tabulky by zbytečně narostly.
+ */
 export function MonoText({ children }: { children: ReactNode }) {
   return (
-    <Typography component="span" sx={{ fontFamily: monoFontFamily, fontSize: 14 }}>
+    <Typography
+      component="span"
+      sx={{ fontFamily: monoFontFamily, fontSize: 14, whiteSpace: 'nowrap' }}
+    >
       {children}
     </Typography>
   );

@@ -18,6 +18,7 @@ import { useTheme } from '@mui/material/styles';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+import { countRunning } from '../domain/plural';
 import { useAuth } from '../data/useAuth';
 import { useRunningActivities } from '../data/useRunningActivities';
 import { layout } from '../theme';
@@ -56,8 +57,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
   const { activities: running } = useRunningActivities();
 
   const title = customTitle ?? defaultTitle(location.pathname);
-  const runningLabel =
-    running.length === 1 ? '1 běžící činnost' : `${running.length} běžící činnosti`;
+  const runningLabel = countRunning(running.length);
 
   return (
     <PageTitleContext.Provider value={setCustomTitle}>

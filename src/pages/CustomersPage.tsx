@@ -23,6 +23,7 @@ import {
   page,
   type CustomerFilters,
 } from '../domain/filters';
+import { countCustomers } from '../domain/plural';
 import type { CustomerFormValues } from '../domain/schemas';
 import type { Customer } from '../domain/types';
 import { layout } from '../theme';
@@ -139,7 +140,7 @@ export function CustomersPage() {
             }}
           />
           <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto' }}>
-            {loading ? 'Načítám…' : `${filtered.length} zákazníků`}
+            {loading ? 'Načítám…' : countCustomers(filtered.length)}
           </Typography>
         </Box>
 
