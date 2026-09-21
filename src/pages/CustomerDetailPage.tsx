@@ -124,7 +124,7 @@ export function CustomerDetailPage() {
     if (!user || !customer) return;
     setBusy(true);
     try {
-      await deleteCustomerCascade(user.uid, customer.id);
+      await deleteCustomerCascade(customer.id);
       setDeleteOpen(false);
       notify('Zákazník a jeho činnosti smazány');
       navigate('/zakaznici');

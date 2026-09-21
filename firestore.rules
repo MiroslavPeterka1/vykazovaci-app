@@ -1,18 +1,83 @@
 rules_version = '2';
 
-// Etapa 0: jen vlastnictví dat. Tvarová validace (povinná pole, konec > začátek,
-// konzistence running/durationMinutes, zákaz zápisu do součtů) přijde v etapě 6.
+// Veškerá data leží pod `users/{uid}` a jsou přístupná jen svému vlastníkovi.
+// Rules jsou jediná autorizační vrstva — omezení API klíče na doménu hostingu
+// chrání kvóty, ne data.
+//
+// Cloud Functions běží přes Admin SDK a rules obcházejí; proto tu smí být
+// zákaz zápisu do počítadel, aniž by to rozbilo trigger, který je udržuje.
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    match /users/{uid} {
-      allow read, write: if isOwner(uid);
+    function incoming() {
+      return request.resource.data;
+    }
 
-      match /{document=**} {
-        allow read, write: if isOwner(uid);
+    function isNonEmptyString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    // Počítadla patří triggeru. Při zakládání se nesmí objevit vůbec,
+    // při úpravě se nesmí změnit.
+    function keepsCounters() {
+      return incoming().get('totalMinutes', 0) == resource.data.get('totalMinutes', 0)
+        && incoming().get('invoicedMinutes', 0) == resource.data.get('invoicedMinutes', 0);
+    }
+
+    function validCustomerFields() {
+      return isNonEmptyString(incoming().name)
+        && incoming().get('ico', '') is string
+        && incoming().get('dic', '') is string
+        && incoming().get('address', '') is string
+        && incoming().get('person', '') is string
+        && incoming().get('phone', '') is string
+        && incoming().get('email', '') is string;
+    }
+
+    function validActivity() {
+      let data = incoming();
+      let end = data.get('end', null);
+      let minutes = data.get('durationMinutes', null);
+      return isNonEmptyString(data.name)
+        && isNonEmptyString(data.customerId)
+        && data.start is timestamp
+        && (end == null || end is timestamp)
+        // `running` je odvozené pole, které musí odpovídat konci — na něm stojí
+        // dotaz na ukončené činnosti v Přehledu.
+        && data.running == (end == null)
+        // Konec nesmí předcházet začátku.
+        && (end == null || end > data.start)
+        // Doba je dopočtená: běžící činnost ji nemá, ukončená ji má nezápornou.
+        && (end == null ? minutes == null : (minutes is int && minutes >= 0))
+        && data.invoiced is bool
+        && (data.get('invoiceDate', null) == null || data.invoiceDate is timestamp)
+        && data.get('note', '') is string;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && isNonEmptyString(incoming().get('email', ''));
+      // Účet maže Cloud Function přes Admin SDK, ne klient.
+      allow delete: if false;
+
+      match /customers/{customerId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && validCustomerFields()
+          && !incoming().keys().hasAny(['totalMinutes', 'invoicedMinutes']);
+        allow update: if isOwner(uid) && validCustomerFields() && keepsCounters();
+        allow delete: if isOwner(uid);
+      }
+
+      match /activities/{activityId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validActivity();
+        allow delete: if isOwner(uid);
       }
     }
   }

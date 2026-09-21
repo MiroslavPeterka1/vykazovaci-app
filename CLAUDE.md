@@ -13,8 +13,12 @@ Zadání je v [readme.md](readme.md), plán implementace vznikl v plan módu a r
 ## Příkazy
 
 - `npm run dev` — vývojový server (http://localhost:5173)
-- `npm run emulators` — Firebase emulátory (Auth 9099, Firestore 8080, UI 4000). **Vyžaduje nainstalovanou Javu.**
+- `npm run emulators` — Firebase emulátory (Auth 9099, Firestore 8080, Functions 5001, UI 4000).
+  **Vyžaduje nainstalovanou Javu.** Hosting emulátor běží na 5055, protože port 5000 na macOS
+  drží AirPlay Receiver.
 - `npm run typecheck` / `npm run lint` / `npm test` — kontroly, které musí projít před commitem
+- `npm run test:rules` — testy bezpečnostních pravidel; emulátor si spustí a zase zhasne samy
+- `npm --prefix functions run build` — překlad Cloud Functions; emulátor i nasazení čtou `functions/lib`
 - `npm run build` — build do `dist/`
 
 Lokální vývoj běží proti emulátorům: `.env.local` míří na projekt `demo-vykazy`. Firebase
@@ -44,6 +48,10 @@ tématem v [src/theme.ts](src/theme.ts), ne přepisem inline stylů. Struktura s
 - **`src/data/`** — Firebase: [firebase.ts](src/data/firebase.ts) (inicializace + emulátory),
   hooky nad Firestore, zápisové operace.
 - **`src/components/`**, **`src/pages/`**, **`src/routes/`** — UI.
+- **`functions/`** — Cloud Functions (Node 22, region `europe-west3`): trigger na počítadla
+  a volatelné `deleteCustomer` a `deleteAccount`. Mazání dělá server proto, že Firestore nemá
+  kaskádu a dávky z prohlížeče by se při zavření okna nedotáhly; u účtu navíc klientské
+  `deleteUser()` vyžaduje čerstvé přihlášení, které Admin SDK obchází.
 
 ### Tři věci, které se snadno rozbijí
 
@@ -56,8 +64,13 @@ tématem v [src/theme.ts](src/theme.ts), ne přepisem inline stylů. Struktura s
    zákazníka se načítají celí na klienta a filtrují lokálně; Přehled používá serverové
    kurzorové stránkování a textové filtry nemá.
 3. **Součty.** `totalMinutes` a `invoicedMinutes` na zákazníkovi udržuje Cloud Function
-   trigger, **ne klient** — administrace probíhá i přímo z konzole Firebase a klientské
-   počítadlo by takové úpravy neviděl. Klient do těchto polí nesmí zapisovat (hlídají rules).
+   trigger `onActivityWritten`, **ne klient** — administrace probíhá i přímo z konzole Firebase
+   a klientské počítadlo by takové úpravy neviděl. Klient do těchto polí nesmí zapisovat
+   (hlídají rules) a `createCustomer` je proto vůbec nezakládá. Počítadla jsou eventuálně
+   konzistentní: po zápisu činnosti se dorovnají se zpožděním.
+4. **Odvozená pole činnosti.** `running` musí vždy odpovídat `end == null` a `durationMinutes`
+   existuje jen u ukončené činnosti. Na `running` stojí dotaz Přehledu (nerovnost nad `end`
+   by vynutila řazení podle `end`), na `durationMinutes` součty. Hlídají to rules i testy.
 
 ## Konvence
 
