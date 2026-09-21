@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#f5f5f5; }
+  body { font-family: Roboto, Helvetica, Arial, sans-serif; color: rgba(0,0,0,0.87); -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color:#1976d2; text-decoration: none; }
+  a:hover { color:#1565c0; text-decoration: underline; }
+  input, button, select, textarea { font-family: inherit; }
+  @keyframes dcfade { from { opacity:0 } to { opacity:1 } }
+  @keyframes dcpop { from { opacity:0; transform: translateY(8px) scale(.98) } to { opacity:1; transform:none } }
+</style>
+</helmet>
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#f5f5f5; padding:48px 24px">
+  <div style="width:100%; max-width:420px">
+    <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:24px">
+      <div style="width:36px; height:36px; border-radius:4px; background:#1976d2; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:500; font-size:18px">V</div>
+      <div style="font-size:20px; font-weight:500; letter-spacing:.15px">Výkazy práce</div>
+    </div>
+    <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); overflow:hidden">
+      <div style="display:flex; borderBottom:1px solid rgba(0,0,0,.12); border-bottom:1px solid rgba(0,0,0,.12)">
+        <button onClick="{{ tabLogin }}" style="{{ tabLoginStyle }}">PŘIHLÁŠENÍ</button>
+        <button onClick="{{ tabRegister }}" style="{{ tabRegStyle }}">REGISTRACE</button>
+      </div>
+      <div style="padding:24px">
+        <sc-if value="{{ authError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fdeded; color:#5f2120; border-radius:4px; padding:8px 16px; font-size:14px; margin-bottom:16px; display:flex; gap:12px; align-items:center">
+            <span style="color:#d32f2f; font-weight:700">!</span><span>{{ authError }}</span>
+          </div>
+        </sc-if>
+        <div style="position:relative; margin-bottom:22px">
+          <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">E-mail</span>
+          <input type="email" value="{{ email }}" onChange="{{ onEmail }}" style="width:100%; padding:16px 14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:16px; outline:none; color:rgba(0,0,0,.87)" style-focus="border-color:#1976d2; box-shadow:inset 0 0 0 1px #1976d2">
+        </div>
+        <div style="position:relative; margin-bottom:8px">
+          <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Heslo</span>
+          <input type="password" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; padding:16px 14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:16px; outline:none; color:rgba(0,0,0,.87)" style-focus="border-color:#1976d2; box-shadow:inset 0 0 0 1px #1976d2">
+        </div>
+        <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative; margin:22px 0 8px">
+            <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Heslo znovu</span>
+            <input type="password" style="width:100%; padding:16px 14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:16px; outline:none" style-focus="border-color:#1976d2; box-shadow:inset 0 0 0 1px #1976d2">
+          </div>
+        </sc-if>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:16px">
+          <button onClick="{{ openReset }}" style="background:none; border:none; padding:6px 0; font-size:13px; color:#1976d2; cursor:pointer">Zapomenuté heslo?</button>
+        </div>
+        <button onClick="{{ doLogin }}" style="width:100%; padding:11px 22px; background:#1976d2; color:#fff; border:none; border-radius:4px; font-size:15px; font-weight:500; letter-spacing:.4px; cursor:pointer; box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)" style-hover="background:#1565c0">{{ submitLabel }}</button>
+        <div style="display:flex; align-items:center; gap:12px; margin:20px 0; color:rgba(0,0,0,.4); font-size:12px">
+          <div style="flex:1; height:1px; background:rgba(0,0,0,.12)"></div>NEBO<div style="flex:1; height:1px; background:rgba(0,0,0,.12)"></div>
+        </div>
+        <button onClick="{{ doLogin }}" style="width:100%; padding:10px 22px; background:#fff; color:rgba(0,0,0,.87); border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; font-weight:500; letter-spacing:.4px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:12px" style-hover="background:rgba(25,118,210,.04); border-color:#1976d2">
+          <span style="width:18px; height:18px; border-radius:50%; background:conic-gradient(#ea4335 0 25%, #fbbc05 0 50%, #34a853 0 75%, #4285f4 0); display:inline-block"></span>
+          POKRAČOVAT S GOOGLE
+        </button>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:24px; font-size:12px; color:rgba(0,0,0,.6)">
+      Pokračováním souhlasíte s <a href="#" onClick="{{ goTerms }}">podmínkami použití</a>.
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh; display:flex; background:#f5f5f5">
+  <div style="width:256px; flex:0 0 256px; background:#fff; border-right:1px solid rgba(0,0,0,.12); display:flex; flex-direction:column; position:sticky; top:0; height:100vh">
+    <div style="height:64px; display:flex; align-items:center; gap:10px; padding:0 16px; border-bottom:1px solid rgba(0,0,0,.12)">
+      <div style="width:32px; height:32px; border-radius:4px; background:#1976d2; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:500">V</div>
+      <div style="font-size:16px; font-weight:500">Výkazy práce</div>
+    </div>
+    <div style="padding:8px">
+      <button onClick="{{ goOverview }}" style="{{ navOverview }}"><span style="width:20px; display:inline-block; text-align:center">▤</span>Přehled</button>
+      <button onClick="{{ goCustomers }}" style="{{ navCustomers }}"><span style="width:20px; display:inline-block; text-align:center">☰</span>Zákazníci</button>
+    </div>
+    <button onClick="{{ goProfile }}" style="{{ profileBtnStyle }}">
+      <div style="width:36px; height:36px; border-radius:50%; background:#42a5f5; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:500">MP</div>
+      <div style="min-width:0; text-align:left">
+        <div style="font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Miroslav Peterka</div>
+        <div style="font-size:12px; color:rgba(0,0,0,.6); overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ email }}</div>
+      </div>
+      <span style="margin-left:auto; color:rgba(0,0,0,.4); font-size:14px">›</span>
+    </button>
+  </div>
+
+  <div style="flex:1; min-width:0; display:flex; flex-direction:column">
+    <div style="height:64px; background:#1976d2; color:#fff; display:flex; align-items:center; padding:0 24px; gap:16px; box-shadow:0 2px 4px -1px rgba(0,0,0,.2),0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12); position:sticky; top:0; z-index:5">
+      <div style="font-size:20px; font-weight:500; letter-spacing:.15px">{{ pageTitle }}</div>
+      <sc-if value="{{ runningCount }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-left:8px; background:rgba(255,255,255,.18); border-radius:16px; padding:4px 12px; font-size:13px; display:flex; align-items:center; gap:8px">
+          <span style="width:8px; height:8px; border-radius:50%; background:#66bb6a; display:inline-block"></span>{{ runningLabel }}
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="flex:1; padding:24px; min-width:0">
+
+      <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; flex-direction:column; gap:24px; max-width:1280px">
+        <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12)">
+          <div style="padding:16px 24px; border-bottom:1px solid rgba(0,0,0,.12); display:flex; align-items:baseline; gap:12px">
+            <div style="font-size:16px; font-weight:500">Běžící činnosti</div>
+            <div style="font-size:13px; color:rgba(0,0,0,.6)">{{ runningLabel }}</div>
+          </div>
+          <sc-if value="{{ hasRunning }}" hint-placeholder-val="{{ true }}">
+          <div style="overflow-x:auto">
+          <table style="width:100%; min-width:820px; border-collapse:collapse">
+            <thead>
+              <tr style="text-align:left; color:rgba(0,0,0,.6); font-size:13px; font-weight:500">
+                <th style="padding:10px 24px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Činnost</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Zákazník</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Začátek</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500; text-align:right">Běží</th>
+                <th style="padding:10px 24px; border-bottom:1px solid rgba(0,0,0,.12); width:140px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ runningRows }}" as="row" hint-placeholder-count="2">
+                <tr onClick="{{ row.onOpen }}" style="cursor:pointer; background:#fff8e1" style-hover="background:#ffecb3">
+                  <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-weight:500">{{ row.name }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; color:rgba(0,0,0,.7)">{{ row.customer }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace">{{ row.start }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; text-align:right; color:#ed6c02; font-weight:500">{{ row.dur }}</td>
+                  <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); text-align:right">
+                    <button onClick="{{ row.onStop }}" style="padding:4px 12px; border:1px solid #d32f2f; color:#d32f2f; background:#fff; border-radius:4px; font-size:13px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:rgba(211,47,47,.06)">UKONČIT</button>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          </div>
+          </sc-if>
+          <sc-if value="{{ noRunning }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:32px 24px; text-align:center; color:rgba(0,0,0,.6); font-size:14px">Žádná činnost právě neběží. Novou spustíte tlačítkem +.</div>
+          </sc-if>
+        </div>
+
+        <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12)">
+          <div style="padding:16px 24px; border-bottom:1px solid rgba(0,0,0,.12); display:flex; align-items:baseline; gap:12px">
+            <div style="font-size:16px; font-weight:500">Odpracovaná práce</div>
+            <div style="font-size:13px; color:rgba(0,0,0,.6)">od nejnovějšího záznamu</div>
+          </div>
+          <div style="overflow-x:auto">
+          <table style="width:100%; min-width:1080px; border-collapse:collapse">
+            <thead>
+              <tr style="text-align:left; color:rgba(0,0,0,.6); font-size:13px">
+                <th style="padding:10px 24px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Činnost</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Zákazník</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Začátek</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Konec</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500; text-align:right">Vykázáno</th>
+                <th style="padding:10px 16px; border-bottom:1px solid rgba(0,0,0,.12); font-weight:500">Vyfakturováno</th>
+                <th style="padding:10px 24px; border-bottom:1px solid rgba(0,0,0,.12); width:150px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ doneRows }}" as="row" hint-placeholder-count="8">
+                <tr onClick="{{ row.onOpen }}" style="cursor:pointer" style-hover="background:rgba(0,0,0,.04)">
+                  <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px">{{ row.name }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; color:rgba(0,0,0,.7)">{{ row.customer }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace">{{ row.start }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace">{{ row.end }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; text-align:right; font-weight:500">{{ row.dur }}</td>
+                  <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12)"><span style="{{ row.invChipStyle }}">{{ row.invChip }}</span></td>
+                  <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); text-align:right; white-space:nowrap">
+                    <sc-if value="{{ row.canInvoice }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ row.onInvoice }}" style="padding:4px 12px; border:1px solid #1976d2; color:#1976d2; background:#fff; border-radius:4px; font-size:12px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:rgba(25,118,210,.06)">VYFAKTUROVAT</button>
+                    </sc-if>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          </div>
+          <div style="padding:12px 24px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:rgba(0,0,0,.6)">
+            <span>{{ overviewRangeLabel }}</span>
+            <span style="display:flex; gap:4px">
+              <button onClick="{{ overviewPrev }}" style="width:32px; height:32px; border:none; background:none; border-radius:50%; cursor:pointer; color:rgba(0,0,0,.54); font-size:16px" style-hover="background:rgba(0,0,0,.06)">‹</button>
+              <button onClick="{{ overviewNext }}" style="width:32px; height:32px; border:none; background:none; border-radius:50%; cursor:pointer; color:rgba(0,0,0,.54); font-size:16px" style-hover="background:rgba(0,0,0,.06)">›</button>
+            </span>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isCustomers }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); max-width:1280px">
+        <div style="padding:16px 24px; border-bottom:1px solid rgba(0,0,0,.12); display:flex; align-items:center; gap:16px">
+          <div style="position:relative; flex:1; max-width:420px">
+            <span style="position:absolute; left:12px; top:9px; color:rgba(0,0,0,.45)">⌕</span>
+            <input value="{{ custSearch }}" onChange="{{ onCustSearch }}" placeholder="Fulltextové vyhledávání" style="width:100%; padding:9px 12px 9px 34px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:14px; outline:none" style-focus="border-color:#1976d2">
+          </div>
+          <div style="margin-left:auto; font-size:13px; color:rgba(0,0,0,.6)">{{ custCountLabel }}</div>
+        </div>
+        <div style="overflow-x:auto">
+        <table style="width:100%; min-width:840px; border-collapse:collapse">
+          <thead>
+            <tr style="text-align:left; color:rgba(0,0,0,.6); font-size:13px">
+              <th style="padding:10px 24px 4px; font-weight:500">Název</th>
+              <th style="padding:10px 16px 4px; font-weight:500">IČ</th>
+              <th style="padding:10px 16px 4px; font-weight:500">Adresa</th>
+              <th style="padding:10px 16px 4px; font-weight:500">Kontaktní osoba</th>
+              <th style="padding:10px 24px 4px; font-weight:500; text-align:right">Vykázáno</th>
+            </tr>
+            <tr>
+              <th style="padding:0 24px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fName }}" onChange="{{ onFName }}" placeholder="Filtr" style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+              <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fIco }}" onChange="{{ onFIco }}" placeholder="Filtr" style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+              <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fAddr }}" onChange="{{ onFAddr }}" placeholder="Filtr" style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+              <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fPerson }}" onChange="{{ onFPerson }}" placeholder="Filtr" style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+              <th style="padding:0 24px 10px; border-bottom:1px solid rgba(0,0,0,.12)"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ custRows }}" as="row" hint-placeholder-count="12">
+              <tr onClick="{{ row.onOpen }}" style="cursor:pointer" style-hover="background:rgba(0,0,0,.04)">
+                <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-weight:500">{{ row.name }}</td>
+                <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; color:rgba(0,0,0,.7)">{{ row.ico }}</td>
+                <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; color:rgba(0,0,0,.7)">{{ row.address }}</td>
+                <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; color:rgba(0,0,0,.7)">{{ row.person }}</td>
+                <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; text-align:right">{{ row.total }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        </div>
+        <div style="padding:12px 24px; display:flex; justify-content:flex-end; align-items:center; gap:16px; font-size:13px; color:rgba(0,0,0,.6)">
+          <span>{{ custRangeLabel }}</span>
+          <span style="display:flex; gap:4px">
+            <button onClick="{{ custPrev }}" style="width:32px; height:32px; border:none; background:none; border-radius:50%; cursor:pointer; color:rgba(0,0,0,.54); font-size:16px" style-hover="background:rgba(0,0,0,.06)">‹</button>
+            <button onClick="{{ custNext }}" style="width:32px; height:32px; border:none; background:none; border-radius:50%; cursor:pointer; color:rgba(0,0,0,.54); font-size:16px" style-hover="background:rgba(0,0,0,.06)">›</button>
+          </span>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:1400px">
+        <button onClick="{{ goCustomers }}" style="background:none; border:none; color:#1976d2; font-size:13px; font-weight:500; letter-spacing:.4px; cursor:pointer; padding:6px 8px 6px 0; margin-bottom:12px">‹ ZPĚT NA ZÁKAZNÍKY</button>
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12)">
+            <div style="padding:16px 16px 16px 24px; border-bottom:1px solid rgba(0,0,0,.12); display:flex; align-items:flex-start; gap:8px">
+              <div style="flex:1; min-width:0">
+                <div style="font-size:18px; font-weight:500; line-height:1.3">{{ detName }}</div>
+                <div style="font-size:13px; color:rgba(0,0,0,.6); margin-top:4px">Zákazník</div>
+              </div>
+              <button onClick="{{ openEditCustomer }}" title="Editovat" style="width:36px; height:36px; border:none; background:none; border-radius:50%; cursor:pointer; font-size:15px" style-hover="background:rgba(0,0,0,.06)">✏️</button>
+              <button onClick="{{ openDeleteCustomer }}" title="Smazat" style="width:36px; height:36px; border:none; background:none; border-radius:50%; cursor:pointer; font-size:15px" style-hover="background:rgba(211,47,47,.08)">🗑</button>
+            </div>
+            <div style="padding:14px 24px 16px; display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px 24px">
+              <sc-for list="{{ detAttrs }}" as="attr" hint-placeholder-count="6">
+                <div style="min-width:0">
+                  <div style="font-size:12px; color:rgba(0,0,0,.6); margin-bottom:2px">{{ attr.label }}</div>
+                  <div style="font-size:14px; overflow-wrap:anywhere">{{ attr.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12)">
+            <div style="padding:14px 24px; display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px 24px">
+              <sc-for list="{{ detStats }}" as="s" hint-placeholder-count="4">
+                <div style="min-width:0">
+                  <div style="font-size:12px; color:rgba(0,0,0,.6); margin-bottom:2px">{{ s.label }}</div>
+                  <div style="font-size:20px; font-weight:500; font-family:'Roboto Mono', monospace; color:{{ s.color }}">{{ s.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12)">
+            <div style="padding:16px 16px 16px 24px; border-bottom:1px solid rgba(0,0,0,.12); display:flex; align-items:center; gap:12px">
+              <div style="font-size:16px; font-weight:500">Činnosti</div>
+              <div style="font-size:13px; color:rgba(0,0,0,.6)">{{ detActCountLabel }}</div>
+              <button onClick="{{ openNewActivityForCustomer }}" style="margin-left:auto; padding:6px 16px; background:#1976d2; color:#fff; border:none; border-radius:4px; font-size:13px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:#1565c0">+ ČINNOST</button>
+            </div>
+            <div style="overflow-x:auto; min-width:0">
+            <table style="width:100%; min-width:1080px; border-collapse:collapse">
+              <thead>
+                <tr style="text-align:left; color:rgba(0,0,0,.6); font-size:13px">
+                  <th style="padding:10px 24px 4px; font-weight:500">Činnost</th>
+                  <th style="padding:10px 16px 4px; font-weight:500">Začátek</th>
+                  <th style="padding:10px 16px 4px; font-weight:500">Konec</th>
+                  <th style="padding:10px 16px 4px; font-weight:500; text-align:right">Vykázáno</th>
+                  <th style="padding:10px 16px 4px; font-weight:500">Vyfakturováno</th>
+                  <th style="padding:10px 16px 4px; font-weight:500">DUZP</th>
+                  <th style="padding:10px 16px 4px; font-weight:500">Poznámka</th>
+                  <th style="padding:10px 24px 4px; width:140px"></th>
+                </tr>
+                <tr>
+                  <th style="padding:0 24px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fAct }}" onChange="{{ onFAct }}" placeholder="Filtr" style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+                  <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fActFrom }}" onChange="{{ onFActFrom }}" placeholder="dd.mm." style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+                  <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"></th>
+                  <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"></th>
+                  <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><select value="{{ fInv }}" onChange="{{ onFInv }}" style="width:100%; padding:5px 6px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none; background:#fff"><option value="">Vše</option><option value="yes">Vyfakturováno</option><option value="no">Nevyfakturováno</option></select></th>
+                  <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"></th>
+                  <th style="padding:0 16px 10px; border-bottom:1px solid rgba(0,0,0,.12)"><input value="{{ fNote }}" onChange="{{ onFNote }}" placeholder="Filtr" style="width:100%; padding:5px 8px; border:1px solid rgba(0,0,0,.18); border-radius:4px; font-size:12px; outline:none" style-focus="border-color:#1976d2"></th>
+                  <th style="padding:0 24px 10px; border-bottom:1px solid rgba(0,0,0,.12)"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ detRows }}" as="row" hint-placeholder-count="10">
+                  <tr onClick="{{ row.onOpen }}" style="cursor:pointer; background:{{ row.bg }}" style-hover="filter:brightness(.97)">
+                    <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px">{{ row.name }}</td>
+                    <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace">{{ row.start }}</td>
+                    <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; color:rgba(0,0,0,.7)">{{ row.end }}</td>
+                    <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; text-align:right; font-weight:500">{{ row.dur }}</td>
+                    <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12)">
+                      <span style="{{ row.invChipStyle }}">{{ row.invChip }}</span>
+                    </td>
+                    <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:14px; font-family:'Roboto Mono', monospace; color:rgba(0,0,0,.7)">{{ row.invDate }}</td>
+                    <td style="padding:{{ cellPad }} 16px; border-bottom:1px solid rgba(0,0,0,.12); font-size:13px; color:rgba(0,0,0,.7); max-width:220px">{{ row.note }}</td>
+                    <td style="padding:{{ cellPad }} 24px; border-bottom:1px solid rgba(0,0,0,.12); text-align:right; white-space:nowrap">
+                      <sc-if value="{{ row.running }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ row.onStop }}" style="padding:3px 10px; border:1px solid #d32f2f; color:#d32f2f; background:#fff; border-radius:4px; font-size:12px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:rgba(211,47,47,.06)">UKONČIT</button>
+                      </sc-if>
+                      <sc-if value="{{ row.canInvoice }}" hint-placeholder-val="{{ true }}">
+                        <button onClick="{{ row.onInvoice }}" style="padding:3px 10px; border:1px solid #1976d2; color:#1976d2; background:#fff; border-radius:4px; font-size:12px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:rgba(25,118,210,.06)">VYFAKTUROVAT</button>
+                      </sc-if>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+            </div>
+            <div style="padding:12px 24px; display:flex; justify-content:flex-end; align-items:center; gap:16px; font-size:13px; color:rgba(0,0,0,.6)">
+              <span>{{ detRangeLabel }}</span>
+              <span style="display:flex; gap:4px">
+                <button onClick="{{ detPrev }}" style="width:32px; height:32px; border:none; background:none; border-radius:50%; cursor:pointer; color:rgba(0,0,0,.54); font-size:16px" style-hover="background:rgba(0,0,0,.06)">‹</button>
+                <button onClick="{{ detNext }}" style="width:32px; height:32px; border:none; background:none; border-radius:50%; cursor:pointer; color:rgba(0,0,0,.54); font-size:16px" style-hover="background:rgba(0,0,0,.06)">›</button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:640px; display:flex; flex-direction:column; gap:24px">
+        <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); padding:24px">
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px">
+            <div style="width:56px; height:56px; border-radius:50%; background:#42a5f5; color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:500">MP</div>
+            <div>
+              <div style="font-size:18px; font-weight:500">Miroslav Peterka</div>
+              <div style="font-size:14px; color:rgba(0,0,0,.6)">{{ email }}</div>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:24px">
+            <div style="border:1px solid rgba(0,0,0,.12); border-radius:4px; padding:16px">
+              <div style="font-size:12px; color:rgba(0,0,0,.6)">Zákazníků</div>
+              <div style="font-size:24px; font-weight:500">{{ statCustomers }}</div>
+            </div>
+            <div style="border:1px solid rgba(0,0,0,.12); border-radius:4px; padding:16px">
+              <div style="font-size:12px; color:rgba(0,0,0,.6)">Činností</div>
+              <div style="font-size:24px; font-weight:500">{{ statActivities }}</div>
+            </div>
+            <div style="border:1px solid rgba(0,0,0,.12); border-radius:4px; padding:16px">
+              <div style="font-size:12px; color:rgba(0,0,0,.6)">Celkem vykázáno</div>
+              <div style="font-size:24px; font-weight:500; font-family:'Roboto Mono', monospace">{{ statTotal }}</div>
+            </div>
+          </div>
+          <button onClick="{{ doLogout }}" style="padding:8px 22px; background:#fff; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:rgba(0,0,0,.04)">ODHLÁSIT SE</button>
+        </div>
+        <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); padding:24px; border-left:none">
+          <div style="font-size:16px; font-weight:500; color:#d32f2f; margin-bottom:8px">Smazání účtu</div>
+          <div style="font-size:14px; color:rgba(0,0,0,.7); line-height:1.6; margin-bottom:16px">Smazáním účtu se nenávratně odstraní všichni vaši zákazníci a všechny vykázané činnosti. Operaci nelze vrátit zpět.</div>
+          <button onClick="{{ openDeleteAccount }}" style="padding:8px 22px; background:#d32f2f; color:#fff; border:none; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:#c62828">SMAZAT ÚČET</button>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isTerms }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:820px; background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); padding:40px 48px">
+        <div style="font-size:28px; font-weight:400; margin-bottom:4px">Podmínky použití</div>
+        <div style="font-size:13px; color:rgba(0,0,0,.6); margin-bottom:32px">Účinné od 20. 9. 2026. Návrh k právní revizi.</div>
+        <sc-for list="{{ terms }}" as="t" hint-placeholder-count="9">
+          <div style="margin-bottom:24px">
+            <div style="font-size:16px; font-weight:500; margin-bottom:8px">{{ t.h }}</div>
+            <div style="font-size:15px; line-height:1.7; color:rgba(0,0,0,.75); text-wrap:pretty; white-space:pre-line">{{ t.p }}</div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+    </div>
+
+    <div style="border-top:1px solid rgba(0,0,0,.12); padding:16px 24px; display:flex; gap:16px; align-items:center; font-size:13px; color:rgba(0,0,0,.6); background:#fff">
+      <span>© 2026 Výkazy práce</span>
+      <a href="#" onClick="{{ goTerms }}">Podmínky použití</a>
+    </div>
+  </div>
+
+  <sc-if value="{{ showFab }}" hint-placeholder-val="{{ true }}">
+    <button onClick="{{ onFab }}" title="{{ fabTitle }}" style="position:fixed; right:32px; bottom:32px; width:56px; height:56px; border-radius:50%; background:#1976d2; color:#fff; border:none; font-size:28px; line-height:1; cursor:pointer; box-shadow:0 3px 5px -1px rgba(0,0,0,.2),0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12); z-index:20" style-hover="background:#1565c0">+</button>
+  </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalActivity }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px; animation:dcfade .15s ease">
+  <div onClick="{{ stopProp }}" style="width:100%; max-width:520px; background:#fff; border-radius:4px; box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12); animation:dcpop .18s ease">
+    <div style="padding:20px 24px 8px; font-size:20px; font-weight:500">{{ activityModalTitle }}</div>
+    <div style="padding:16px 24px 8px; display:flex; flex-direction:column; gap:22px">
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Název činnosti</span>
+        <input value="{{ actName }}" onChange="{{ onActName }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6); z-index:1">Zákazník</span>
+        <input value="{{ actCustQuery }}" onChange="{{ onActCustQuery }}" onFocus="{{ openCustDropdown }}" placeholder="Hledat zákazníka…" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+        <sc-if value="{{ custDropdownOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; top:calc(100% + 4px); left:0; right:0; max-height:220px; overflow:auto; background:#fff; border-radius:4px; box-shadow:0 5px 5px -3px rgba(0,0,0,.2),0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12); z-index:3">
+            <sc-for list="{{ custOptions }}" as="opt" hint-placeholder-count="5">
+              <div onClick="{{ opt.onPick }}" style="padding:10px 16px; font-size:14px; cursor:pointer" style-hover="background:rgba(25,118,210,.08)">{{ opt.name }}</div>
+            </sc-for>
+            <sc-if value="{{ noCustOptions }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:12px 16px; font-size:14px; color:rgba(0,0,0,.6)">Nic nenalezeno</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px">
+        <div style="position:relative; min-width:0">
+          <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Začátek</span>
+          <input type="datetime-local" value="{{ actStart }}" onChange="{{ onActStart }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:14px; outline:none" style-focus="border-color:#1976d2">
+        </div>
+        <div style="position:relative">
+          <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Konec</span>
+          <input type="datetime-local" value="{{ actEnd }}" onChange="{{ onActEnd }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:14px; outline:none" style-focus="border-color:#1976d2">
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; background:rgba(0,0,0,.03); border-radius:4px; padding:12px 16px">
+        <span style="font-size:13px; color:rgba(0,0,0,.6)">Vykázaná doba</span>
+        <span style="font-size:18px; font-family:'Roboto Mono', monospace; font-weight:500">{{ actDuration }}</span>
+        <span style="font-size:12px; color:rgba(0,0,0,.5); margin-left:auto">{{ actDurationNote }}</span>
+      </div>
+      <div style="height:1px; background:rgba(0,0,0,.12)"></div>
+      <div style="display:flex; align-items:center; gap:14px">
+        <button onClick="{{ toggleActInvoiced }}" style="{{ toggleTrackStyle }}"><span style="{{ toggleThumbStyle }}"></span></button>
+        <span style="font-size:15px">Vyfakturováno</span>
+      </div>
+      <sc-if value="{{ actInvoiced }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative">
+          <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">DUZP</span>
+          <input type="date" value="{{ actInvDate }}" onChange="{{ onActInvDate }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:14px; outline:none" style-focus="border-color:#1976d2">
+        </div>
+      </sc-if>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Poznámka</span>
+        <textarea value="{{ actNote }}" onChange="{{ onActNote }}" rows="2" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none; resize:vertical" style-focus="border-color:#1976d2"></textarea>
+      </div>
+    </div>
+    <div style="padding:16px 16px 12px; display:flex; justify-content:flex-end; gap:8px">
+      <sc-if value="{{ canDeleteActivity }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ deleteActivity }}" style="margin-right:auto; padding:8px 12px; background:none; border:none; color:#d32f2f; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(211,47,47,.06)">SMAZAT</button>
+      </sc-if>
+      <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
+      <button onClick="{{ saveActivity }}" style="padding:8px 22px; background:#1976d2; color:#fff; border:none; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:#1565c0">{{ activitySaveLabel }}</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalCustomer }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px; animation:dcfade .15s ease">
+  <div onClick="{{ stopProp }}" style="width:100%; max-width:560px; background:#fff; border-radius:4px; box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12); animation:dcpop .18s ease; max-height:90vh; overflow:auto">
+    <div style="padding:20px 24px 8px; font-size:20px; font-weight:500">{{ customerModalTitle }}</div>
+    <div style="padding:20px 24px 8px; display:grid; grid-template-columns:1fr 1fr; gap:22px 16px">
+      <div style="position:relative; grid-column:span 2">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Název</span>
+        <input value="{{ cfName }}" onChange="{{ onCfName }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">IČ</span>
+        <input value="{{ cfIco }}" onChange="{{ onCfIco }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">DIČ</span>
+        <input value="{{ cfDic }}" onChange="{{ onCfDic }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative; grid-column:span 2">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Adresa</span>
+        <input value="{{ cfAddr }}" onChange="{{ onCfAddr }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative; grid-column:span 2">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Kontaktní osoba</span>
+        <input value="{{ cfPerson }}" onChange="{{ onCfPerson }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Telefon</span>
+        <input value="{{ cfPhone }}" onChange="{{ onCfPhone }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">E-mail</span>
+        <input value="{{ cfEmail }}" onChange="{{ onCfEmail }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+    </div>
+    <div style="padding:16px; display:flex; justify-content:flex-end; gap:8px">
+      <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
+      <button onClick="{{ saveCustomer }}" style="padding:8px 22px; background:#1976d2; color:#fff; border:none; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:#1565c0">ULOŽIT</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalDelete }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px; animation:dcfade .15s ease">
+  <div onClick="{{ stopProp }}" style="width:100%; max-width:480px; background:#fff; border-radius:4px; box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12); animation:dcpop .18s ease">
+    <div style="padding:20px 24px 8px; font-size:20px; font-weight:500">{{ deleteTitle }}</div>
+    <div style="padding:8px 24px 16px; font-size:15px; line-height:1.6; color:rgba(0,0,0,.7)">{{ deleteBody }}</div>
+    <div style="padding:0 24px 8px">
+      <div style="position:relative; margin-top:14px">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">{{ deleteFieldLabel }}</span>
+        <input value="{{ deleteConfirm }}" onChange="{{ onDeleteConfirm }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#d32f2f">
+      </div>
+      <div style="font-size:12px; color:rgba(0,0,0,.6); margin-top:6px">Přesný text: {{ deletePhrase }}</div>
+    </div>
+    <div style="padding:16px; display:flex; justify-content:flex-end; gap:8px">
+      <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
+      <button onClick="{{ confirmDelete }}" disabled="{{ deleteDisabled }}" style="{{ deleteBtnStyle }}">SMAZAT NENÁVRATNĚ</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalInvoice }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px; animation:dcfade .15s ease">
+  <div onClick="{{ stopProp }}" style="width:100%; max-width:480px; background:#fff; border-radius:4px; box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12); animation:dcpop .18s ease">
+    <div style="padding:20px 24px 4px; font-size:20px; font-weight:500">Vyfakturovat</div>
+    <div style="padding:0 24px 8px; font-size:14px; color:rgba(0,0,0,.6)">{{ invoiceSubtitle }}</div>
+    <div style="padding:20px 24px 8px; display:flex; flex-direction:column; gap:22px">
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">DUZP</span>
+        <input type="date" value="{{ invDate }}" onChange="{{ onInvDate }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:14px; outline:none" style-focus="border-color:#1976d2">
+      </div>
+      <div style="position:relative">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Poznámka</span>
+        <textarea value="{{ invNote }}" onChange="{{ onInvNote }}" rows="3" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none; resize:vertical" style-focus="border-color:#1976d2"></textarea>
+      </div>
+    </div>
+    <div style="padding:16px; display:flex; justify-content:flex-end; gap:8px">
+      <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
+      <button onClick="{{ confirmInvoice }}" style="padding:8px 22px; background:#1976d2; color:#fff; border:none; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:#1565c0">VYFAKTUROVAT</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ snackbar }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed; left:24px; bottom:24px; background:#323232; color:#fff; padding:14px 16px; border-radius:4px; font-size:14px; box-shadow:0 3px 5px -1px rgba(0,0,0,.2),0 6px 10px 0 rgba(0,0,0,.14); z-index:60; animation:dcpop .18s ease">{{ snackbar }}</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;rowsPerPageOverview&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:10,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:5,&quot;max&quot;:25,&quot;section&quot;:&quot;Tabulky&quot;},&quot;rowsPerPageCustomers&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:10,&quot;max&quot;:100,&quot;section&quot;:&quot;Tabulky&quot;},&quot;dense&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tabulky&quot;},&quot;highlightRunning&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tabulky&quot;}}">
+const CNAMES = ["Alfatech","Bohemia Logistic","Cermak Media","Dravec Group","Elipsa Studio","Fenix Energo","Granit Stavby","Horizont IT","Iskra Trade","Jasmín Café","Kovoplast","Lumen Design","Modrá Pyramida s.r.o.","Norda Systems","Orbita Print","Prahaservis","Quartz Consulting","Rebus Software","Silmet","Termika","Uniplast","Vertigo Games","Wenzel & syn","Xenon Labs","Yarra Foods","Zenit Reality","Atrium Dental","Bistro Kotva","Cyklo Nekola","Delta Audit","Ekofarma Zlín","Fortis Právní","Grafton Media","Hydro CZ","Inovis","Jantar Textil","Kredo Účetní","Litera Nakl.","Metrum","Nova Klima","Optika Sedlák","Pentagon Bau","Ratio Finance","Stella Hotels","Tempus Auto","Unikov","Vitalis Klinika","Wood Interiér","Zebra Print","Amber Tech","Brona Nábytek","Calypso Travel","Dubnica Steel","Enigma Data","Farma Bezdínek","Gemini Sport","Halo Telecom","Impuls Reklama","Jednota Vsetín","Kaskáda Sport","Lipno Resort","Merkur Trading","Nexus Bio","Ovoce Plus"];
+const ACT = ["Konzultace","Vývoj API","Code review","Nasazení na produkci","Analýza požadavků","Oprava chyby","Školení uživatelů","Migrace dat","Návrh architektury","Testování","Reporting","Údržba serveru","Telefonát","Workshop","Dokumentace"];
+const STREETS = ["Na Příkopě","Vinohradská","Husova","Nádražní","Masarykova","Sokolská","Dlouhá","Riegrova","Palackého","Zahradní"];
+const CITIES = ["Praha 1","Brno","Ostrava","Plzeň","Olomouc","Liberec","Hradec Králové","Zlín","Pardubice","Ústí n. L."];
+const FIRST = ["Jan","Petra","Tomáš","Lucie","Martin","Eva","Jakub","Klára","Ondřej","Hana","Pavel","Tereza"];
+const LAST = ["Novák","Svobodová","Dvořák","Černá","Procházka","Kučerová","Veselý","Horáká","Němec","Marková","Pospíšil","Králová"];
+const pad = (n) => (n < 10 ? "0" + n : "" + n);
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    let s = 20260920;
+    const rnd = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+    const customers = CNAMES.map((name, i) => ({
+      id: "c" + i, name,
+      ico: "" + (24000000 + Math.floor(rnd() * 75000000)),
+      dic: "CZ" + (24000000 + Math.floor(rnd() * 75000000)),
+      address: STREETS[Math.floor(rnd() * 10)] + " " + (1 + Math.floor(rnd() * 90)) + ", " + CITIES[Math.floor(rnd() * 10)],
+      person: FIRST[Math.floor(rnd() * 12)] + " " + LAST[Math.floor(rnd() * 12)],
+      phone: "+420 " + (600 + Math.floor(rnd() * 170)) + " " + (100 + Math.floor(rnd() * 899)) + " " + (100 + Math.floor(rnd() * 899)),
+      email: "info@" + name.toLowerCase().replace(/[^a-z]/g, "").slice(0, 10) + ".cz",
+    }));
+    const now = new Date(2026, 8, 20, 16, 42, 0);
+    const activities = [];
+    for (let i = 0; i < 240; i++) {
+      const c = customers[Math.floor(rnd() * customers.length)];
+      const daysBack = Math.floor(rnd() * 120);
+      const start = new Date(now.getTime() - daysBack * 864e5);
+      start.setHours(7 + Math.floor(rnd() * 10), Math.floor(rnd() * 12) * 5, 0, 0);
+      const mins = 15 + Math.floor(rnd() * 26) * 15;
+      activities.push({ id: "a" + i, cid: c.id, name: ACT[Math.floor(rnd() * ACT.length)], start, end: new Date(start.getTime() + mins * 60000) });
+    }
+    // přechod na zimní čas 25. 10. 2026 — den má 25 hodin
+    activities.push({ id: "adst", cid: customers[3].id, name: "Noční nasazení (přechod na zimní čas)", start: new Date(2026, 9, 24, 22, 0), end: new Date(2026, 9, 25, 6, 0) });
+    activities.push({ id: "r1", cid: customers[7].id, name: "Vývoj API", start: new Date(2026, 8, 20, 13, 15), end: null });
+    activities.push({ id: "r2", cid: customers[12].id, name: "Konzultace k migraci", start: new Date(2026, 8, 20, 15, 5), end: null });
+    const NOTES = ["", "", "", "Faktura 2026/0143", "Součást paušálu", "Odsouhlaseno e-mailem", "Doprava účtována zvlášť"];
+    activities.forEach((a) => {
+      const old = a.end && (now - a.start) > 30 * 864e5;
+      a.invoiced = !!old && rnd() < 0.85;
+      a.invoiceDate = a.invoiced ? new Date(a.start.getFullYear(), a.start.getMonth() + 1, 5) : null;
+      a.note = NOTES[Math.floor(rnd() * NOTES.length)];
+    });
+    activities.sort((a, b) => b.start - a.start);
+    this.state = {
+      route: "login", authMode: "login", email: "miroslav.peterka@example.cz", password: "••••••••", authError: "",
+      customers, activities, selectedId: null,
+      modal: null, editingId: null, newForCustomer: null,
+      actName: "", actCustId: null, actCustQuery: "", custDropdownOpen: false, actStart: "", actEnd: "",
+      cf: {}, deleteKind: null, deleteConfirm: "",
+      custSearch: "", fName: "", fIco: "", fAddr: "", fPerson: "", fAct: "", fActFrom: "", fInv: "", fNote: "",
+      actInvoiced: false, actInvDate: "", actNote: "", invoiceId: null, invDate: "", invNote: "",
+      pageOverview: 0, pageCust: 0, pageDet: 0, snackbar: "", tick: 0,
+    };
+  }
+  componentDidMount() { this.timer = setInterval(() => this.setState({ tick: Date.now() }), 30000); }
+  componentWillUnmount() { clearInterval(this.timer); if (this.snackT) clearTimeout(this.snackT); }
+  toast(msg) { this.setState({ snackbar: msg }); if (this.snackT) clearTimeout(this.snackT); this.snackT = setTimeout(() => this.setState({ snackbar: "" }), 2600); }
+  now() { return new Date(2026, 8, 20, 16, 42, 0); }
+  fmtDT(d) { return d ? pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) : "—"; }
+  fmtDur(ms) { const m = Math.max(0, Math.round(ms / 60000)); return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
+  fmtD(d) { return d ? pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear() : "—"; }
+  toLocalD(d) { return d ? d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) : ""; }
+  toLocal(d) { return d ? d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes()) : ""; }
+  cust(id) { return this.state.customers.find((c) => c.id === id) || null; }
+  totalFor(id) { return this.state.activities.filter((a) => a.cid === id && a.end).reduce((s, a) => s + (a.end - a.start), 0); }
+
+  stop(id) {
+    this.setState((st) => ({ activities: st.activities.map((a) => (a.id === id ? Object.assign({}, a, { end: this.now() }) : a)) }));
+    this.toast("Činnost ukončena");
+  }
+  openActivity(id) {
+    const a = this.state.activities.find((x) => x.id === id);
+    const c = this.cust(a.cid);
+    this.setState({ route: "detail", selectedId: a.cid, pageDet: 0, modal: "activity", editingId: id, actName: a.name, actCustId: a.cid, actCustQuery: c ? c.name : "", actStart: this.toLocal(a.start), actEnd: this.toLocal(a.end), custDropdownOpen: false, actInvoiced: !!a.invoiced, actInvDate: this.toLocalD(a.invoiceDate), actNote: a.note || "" });
+  }
+  newActivity(cid) {
+    const c = cid ? this.cust(cid) : null;
+    this.setState({ modal: "activity", editingId: null, actName: "", actCustId: cid || null, actCustQuery: c ? c.name : "", actStart: this.toLocal(this.now()), actEnd: "", custDropdownOpen: false, actInvoiced: false, actInvDate: "", actNote: "" });
+  }
+  saveActivity() {
+    const st = this.state;
+    if (!st.actName.trim() || !st.actCustId) { this.toast("Vyplňte název a zákazníka"); return; }
+    const start = st.actStart ? new Date(st.actStart) : this.now();
+    const end = st.actEnd ? new Date(st.actEnd) : null;
+    const inv = { invoiced: !!st.actInvoiced, invoiceDate: st.actInvoiced && st.actInvDate ? new Date(st.actInvDate) : null, note: st.actNote || "" };
+    if (st.editingId) {
+      this.setState((s) => ({ activities: s.activities.map((a) => (a.id === st.editingId ? Object.assign({}, a, { name: st.actName, cid: st.actCustId, start, end }, inv) : a)), modal: null }));
+      this.toast("Činnost uložena");
+    } else {
+      const a = Object.assign({ id: "n" + Date.now(), cid: st.actCustId, name: st.actName, start, end }, inv);
+      this.setState((s) => ({ activities: [a].concat(s.activities).sort((x, y) => y.start - x.start), modal: null }));
+      this.toast("Činnost spuštěna");
+    }
+  }
+
+  renderVals() {
+    const st = this.state, p = this.props;
+    const perOv = p.rowsPerPageOverview || 10, perCust = p.rowsPerPageCustomers || 50, perDet = 10;
+    const cellPad = p.dense ? "8px" : "14px";
+    const running = st.activities.filter((a) => !a.end);
+    const done = st.activities.filter((a) => a.end);
+    const mkRow = (a) => {
+      const c = this.cust(a.cid);
+      return { id: a.id, name: a.name, customer: c ? c.name : "—", start: this.fmtDT(a.start), end: this.fmtDT(a.end),
+        dur: this.fmtDur((a.end || this.now()) - a.start), running: !a.end,
+        bg: !a.end && p.highlightRunning !== false ? "#fff8e1" : "#fff",
+        invChip: a.invoiced ? "Ano" : "Ne",
+        invChipStyle: "display:inline-block; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:500;" + (a.invoiced ? "background:#e8f5e9; color:#1b5e20;" : "background:rgba(0,0,0,.08); color:rgba(0,0,0,.6);"),
+        invDate: a.invoiceDate ? this.fmtD(a.invoiceDate) : "—",
+        note: a.note || "—",
+        canInvoice: !!a.end && !a.invoiced,
+        onInvoice: (e) => { e.stopPropagation(); this.setState({ modal: "invoice", invoiceId: a.id, invDate: this.toLocalD(this.now()), invNote: a.note || "" }); },
+        onOpen: () => this.openActivity(a.id),
+        onStop: (e) => { e.stopPropagation(); this.stop(a.id); } };
+    };
+    const ovStart = st.pageOverview * perOv;
+    const doneRows = done.slice(ovStart, ovStart + perOv).map(mkRow);
+
+    const q = st.custSearch.trim().toLowerCase();
+    const filtered = st.customers.filter((c) => {
+      const hay = (c.name + " " + c.ico + " " + c.dic + " " + c.address + " " + c.person + " " + c.phone + " " + c.email).toLowerCase();
+      if (q && hay.indexOf(q) === -1) return false;
+      if (st.fName && c.name.toLowerCase().indexOf(st.fName.toLowerCase()) === -1) return false;
+      if (st.fIco && c.ico.indexOf(st.fIco) === -1) return false;
+      if (st.fAddr && c.address.toLowerCase().indexOf(st.fAddr.toLowerCase()) === -1) return false;
+      if (st.fPerson && c.person.toLowerCase().indexOf(st.fPerson.toLowerCase()) === -1) return false;
+      return true;
+    });
+    const cStart = st.pageCust * perCust;
+    const custRows = filtered.slice(cStart, cStart + perCust).map((c) => ({
+      id: c.id, name: c.name, ico: c.ico, address: c.address, person: c.person,
+      total: this.fmtDur(this.totalFor(c.id)),
+      onOpen: () => this.setState({ route: "detail", selectedId: c.id, pageDet: 0, fAct: "", fActFrom: "" }),
+    }));
+
+    const sel = st.selectedId ? this.cust(st.selectedId) : null;
+    const detAll = sel ? st.activities.filter((a) => a.cid === sel.id).filter((a) => {
+      if (st.fAct && a.name.toLowerCase().indexOf(st.fAct.toLowerCase()) === -1) return false;
+      if (st.fActFrom && this.fmtDT(a.start).indexOf(st.fActFrom) === -1) return false;
+      if (st.fInv === "yes" && !a.invoiced) return false;
+      if (st.fInv === "no" && a.invoiced) return false;
+      if (st.fNote && (a.note || "").toLowerCase().indexOf(st.fNote.toLowerCase()) === -1) return false;
+      return true;
+    }) : [];
+    const selActs = sel ? st.activities.filter((a) => a.cid === sel.id && a.end) : [];
+    const mStart = new Date(this.now().getFullYear(), this.now().getMonth(), 1);
+    const sumMs = (arr) => arr.reduce((s, a) => s + (a.end - a.start), 0);
+    const dStart = st.pageDet * perDet;
+    const detRows = detAll.slice(dStart, dStart + perDet).map(mkRow);
+
+    const dq = st.actCustQuery.trim().toLowerCase();
+    const opts = st.customers.filter((c) => !dq || c.name.toLowerCase().indexOf(dq) !== -1).slice(0, 40)
+      .map((c) => ({ id: c.id, name: c.name, onPick: () => this.setState({ actCustId: c.id, actCustQuery: c.name, custDropdownOpen: false }) }));
+
+    const actStartD = st.actStart ? new Date(st.actStart) : null;
+    const actEndD = st.actEnd ? new Date(st.actEnd) : null;
+    const spansDst = actStartD && actEndD && actStartD.getTimezoneOffset() !== actEndD.getTimezoneOffset();
+    const totalMs = st.activities.filter((a) => a.end).reduce((s, a) => s + (a.end - a.start), 0);
+    const navBase = "display:flex; align-items:center; gap:16px; width:100%; padding:10px 16px; margin-bottom:2px; border:none; border-radius:4px; font-size:14px; text-align:left; cursor:pointer;";
+    const nav = (on) => navBase + (on ? "background:rgba(25,118,210,.12); color:#1565c0; font-weight:500;" : "background:none; color:rgba(0,0,0,.75);");
+    const tab = (on) => "flex:1; padding:14px 8px; border:none; background:none; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer;" + (on ? "color:#1976d2; box-shadow:inset 0 -2px 0 #1976d2;" : "color:rgba(0,0,0,.6);");
+    const titles = { overview: "Přehled", customers: "Zákazníci", detail: sel ? sel.name : "Zákazník", profile: "Uživatelský profil", terms: "Podmínky použití" };
+    const deletingCustomer = st.deleteKind === "customer";
+    const phrase = deletingCustomer ? (sel ? sel.name : "") : "SMAZAT ÚČET";
+    const okDelete = st.deleteConfirm.trim() === phrase;
+
+    return {
+      isLogin: st.route === "login", isApp: st.route !== "login",
+      isRegister: st.authMode === "register", authError: st.authError,
+      submitLabel: st.authMode === "register" ? "VYTVOŘIT ÚČET" : "PŘIHLÁSIT SE",
+      tabLoginStyle: tab(st.authMode === "login"), tabRegStyle: tab(st.authMode === "register"),
+      tabLogin: () => this.setState({ authMode: "login", authError: "" }),
+      tabRegister: () => this.setState({ authMode: "register", authError: "" }),
+      email: st.email, password: st.password,
+      onEmail: (e) => this.setState({ email: e.target.value }), onPassword: (e) => this.setState({ password: e.target.value }),
+      doLogin: () => this.setState({ route: "overview", authError: "" }),
+      doLogout: () => this.setState({ route: "login" }),
+      openReset: () => { this.setState({ authError: "" }); this.toast("Odkaz pro reset hesla odeslán na " + st.email); },
+
+      pageTitle: titles[st.route] || "Přehled",
+      isOverview: st.route === "overview", isCustomers: st.route === "customers",
+      isDetail: st.route === "detail", isProfile: st.route === "profile", isTerms: st.route === "terms",
+      navOverview: nav(st.route === "overview"), navCustomers: nav(st.route === "customers" || st.route === "detail"),
+      profileBtnStyle: "margin-top:auto; width:100%; padding:16px; border:none; border-top:1px solid rgba(0,0,0,.12); display:flex; align-items:center; gap:12px; cursor:pointer; font-family:inherit; color:rgba(0,0,0,.87);" + (st.route === "profile" ? "background:rgba(25,118,210,.12);" : "background:none;"),
+      goOverview: () => this.setState({ route: "overview" }), goCustomers: () => this.setState({ route: "customers", selectedId: null }),
+      goProfile: () => this.setState({ route: "profile" }),
+      goTerms: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ route: "terms" }); },
+      cellPad,
+
+      runningRows: running.map(mkRow), hasRunning: running.length > 0, noRunning: running.length === 0,
+      runningCount: running.length > 0, runningLabel: running.length === 1 ? "1 běžící činnost" : running.length + " běžící činnosti",
+      doneRows,
+      overviewRangeLabel: (ovStart + 1) + "–" + Math.min(ovStart + perOv, done.length) + " z " + done.length,
+      overviewPrev: () => this.setState((s) => ({ pageOverview: Math.max(0, s.pageOverview - 1) })),
+      overviewNext: () => this.setState((s) => ({ pageOverview: (s.pageOverview + 1) * perOv < done.length ? s.pageOverview + 1 : s.pageOverview })),
+
+      custSearch: st.custSearch, onCustSearch: (e) => this.setState({ custSearch: e.target.value, pageCust: 0 }),
+      fName: st.fName, fIco: st.fIco, fAddr: st.fAddr, fPerson: st.fPerson,
+      onFName: (e) => this.setState({ fName: e.target.value, pageCust: 0 }),
+      onFIco: (e) => this.setState({ fIco: e.target.value, pageCust: 0 }),
+      onFAddr: (e) => this.setState({ fAddr: e.target.value, pageCust: 0 }),
+      onFPerson: (e) => this.setState({ fPerson: e.target.value, pageCust: 0 }),
+      custRows, custCountLabel: filtered.length + " zákazníků",
+      custRangeLabel: filtered.length ? (cStart + 1) + "–" + Math.min(cStart + perCust, filtered.length) + " z " + filtered.length : "0 z 0",
+      custPrev: () => this.setState((s) => ({ pageCust: Math.max(0, s.pageCust - 1) })),
+      custNext: () => this.setState((s) => ({ pageCust: (s.pageCust + 1) * perCust < filtered.length ? s.pageCust + 1 : s.pageCust })),
+
+      detName: sel ? sel.name : "", detTotal: sel ? this.fmtDur(this.totalFor(sel.id)) : "00:00",
+      detAttrs: sel ? [
+        { label: "IČ", value: sel.ico }, { label: "DIČ", value: sel.dic }, { label: "Adresa", value: sel.address },
+        { label: "Kontaktní osoba", value: sel.person }, { label: "Telefon", value: sel.phone }, { label: "E-mail", value: sel.email },
+      ] : [],
+      detStats: [
+        { label: "Celkem vykázáno", value: this.fmtDur(sumMs(selActs)), color: "rgba(0,0,0,.87)" },
+        { label: "Celkem vyfakturováno", value: this.fmtDur(sumMs(selActs.filter((a) => a.invoiced))), color: "#2e7d32" },
+        { label: "Vykázáno tento měsíc", value: this.fmtDur(sumMs(selActs.filter((a) => a.start >= mStart))), color: "rgba(0,0,0,.87)" },
+        { label: "Vyfakturováno tento měsíc", value: this.fmtDur(sumMs(selActs.filter((a) => a.invoiced && a.start >= mStart))), color: "#2e7d32" },
+      ],
+      fInv: st.fInv, fNote: st.fNote,
+      onFInv: (e) => this.setState({ fInv: e.target.value, pageDet: 0 }),
+      onFNote: (e) => this.setState({ fNote: e.target.value, pageDet: 0 }),
+      actInvoiced: st.actInvoiced, actInvDate: st.actInvDate, actNote: st.actNote,
+      toggleActInvoiced: () => this.setState((s) => ({ actInvoiced: !s.actInvoiced, actInvDate: !s.actInvoiced && !s.actInvDate ? this.toLocalD(this.now()) : s.actInvDate })),
+      onActInvDate: (e) => this.setState({ actInvDate: e.target.value }),
+      onActNote: (e) => this.setState({ actNote: e.target.value }),
+      toggleTrackStyle: "width:44px; height:24px; border-radius:12px; border:none; padding:0; position:relative; cursor:pointer; transition:background .15s;" + (st.actInvoiced ? "background:#1976d2;" : "background:rgba(0,0,0,.26);"),
+      toggleThumbStyle: "position:absolute; top:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:left .15s;" + (st.actInvoiced ? "left:23px;" : "left:3px;"),
+      modalInvoice: st.modal === "invoice",
+      invoiceSubtitle: (() => { const a = st.activities.find((x) => x.id === st.invoiceId); if (!a) return ""; const c = this.cust(a.cid); return a.name + " · " + (c ? c.name : "") + " · " + this.fmtDur(a.end - a.start); })(),
+      invDate: st.invDate, invNote: st.invNote,
+      onInvDate: (e) => this.setState({ invDate: e.target.value }),
+      onInvNote: (e) => this.setState({ invNote: e.target.value }),
+      confirmInvoice: () => {
+        const id = st.invoiceId, d = st.invDate ? new Date(st.invDate) : this.now(), note = st.invNote;
+        this.setState((s) => ({ activities: s.activities.map((a) => (a.id === id ? Object.assign({}, a, { invoiced: true, invoiceDate: d, note }) : a)), modal: null, invoiceId: null }));
+        this.toast("Označeno jako vyfakturováno");
+      },
+      detRows, detActCountLabel: detAll.length + " záznamů",
+      detRangeLabel: detAll.length ? (dStart + 1) + "–" + Math.min(dStart + perDet, detAll.length) + " z " + detAll.length : "0 z 0",
+      detPrev: () => this.setState((s) => ({ pageDet: Math.max(0, s.pageDet - 1) })),
+      detNext: () => this.setState((s) => ({ pageDet: (s.pageDet + 1) * perDet < detAll.length ? s.pageDet + 1 : s.pageDet })),
+      fAct: st.fAct, fActFrom: st.fActFrom,
+      onFAct: (e) => this.setState({ fAct: e.target.value, pageDet: 0 }),
+      onFActFrom: (e) => this.setState({ fActFrom: e.target.value, pageDet: 0 }),
+      openNewActivityForCustomer: () => this.newActivity(st.selectedId),
+
+      statCustomers: st.customers.length, statActivities: st.activities.length, statTotal: this.fmtDur(totalMs),
+
+      showFab: st.route === "overview" || st.route === "customers",
+      fabTitle: st.route === "customers" ? "Nový zákazník" : "Nová činnost",
+      onFab: () => { if (st.route === "customers") { this.setState({ modal: "customer", editingId: null, cf: {} }); } else { this.newActivity(null); } },
+
+      modalActivity: st.modal === "activity", modalCustomer: st.modal === "customer", modalDelete: st.modal === "delete",
+      closeModal: () => this.setState({ modal: null, custDropdownOpen: false, deleteConfirm: "" }),
+      stopProp: (e) => e.stopPropagation(),
+      activityModalTitle: st.editingId ? "Editace činnosti" : "Nová činnost",
+      activitySaveLabel: st.editingId ? "ULOŽIT" : "SPUSTIT",
+      actName: st.actName, onActName: (e) => this.setState({ actName: e.target.value }),
+      actCustQuery: st.actCustQuery, custDropdownOpen: st.custDropdownOpen,
+      onActCustQuery: (e) => this.setState({ actCustQuery: e.target.value, custDropdownOpen: true, actCustId: null }),
+      openCustDropdown: () => this.setState({ custDropdownOpen: true }),
+      custOptions: opts, noCustOptions: opts.length === 0,
+      actStart: st.actStart, actEnd: st.actEnd,
+      onActStart: (e) => this.setState({ actStart: e.target.value }), onActEnd: (e) => this.setState({ actEnd: e.target.value }),
+      actDuration: actStartD && actEndD ? this.fmtDur(actEndD - actStartD) : "běží",
+      actDurationNote: spansDst ? "zahrnuje změnu času" : "HH:MM, dopočítáno",
+      canDeleteActivity: !!st.editingId,
+      deleteActivity: () => { const id = st.editingId; this.setState((s) => ({ activities: s.activities.filter((a) => a.id !== id), modal: null })); this.toast("Činnost smazána"); },
+      saveActivity: () => this.saveActivity(),
+
+      customerModalTitle: st.editingId === "cust" ? "Editace zákazníka" : "Nový zákazník",
+      cfName: st.cf.name || "", cfIco: st.cf.ico || "", cfDic: st.cf.dic || "", cfAddr: st.cf.address || "",
+      cfPerson: st.cf.person || "", cfPhone: st.cf.phone || "", cfEmail: st.cf.email || "",
+      onCfName: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { name: e.target.value }) })),
+      onCfIco: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { ico: e.target.value }) })),
+      onCfDic: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { dic: e.target.value }) })),
+      onCfAddr: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { address: e.target.value }) })),
+      onCfPerson: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { person: e.target.value }) })),
+      onCfPhone: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { phone: e.target.value }) })),
+      onCfEmail: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { email: e.target.value }) })),
+      openEditCustomer: () => this.setState({ modal: "customer", editingId: "cust", cf: Object.assign({}, sel) }),
+      saveCustomer: () => {
+        const cf = st.cf;
+        if (!cf.name || !cf.name.trim()) { this.toast("Vyplňte název zákazníka"); return; }
+        if (st.editingId === "cust") {
+          this.setState((s) => ({ customers: s.customers.map((c) => (c.id === s.selectedId ? Object.assign({}, c, cf) : c)), modal: null }));
+          this.toast("Zákazník uložen");
+        } else {
+          const id = "n" + Date.now();
+          const c = Object.assign({ id, ico: "", dic: "", address: "", person: "", phone: "", email: "" }, cf, { id });
+          this.setState((s) => ({ customers: [c].concat(s.customers), modal: null, route: "detail", selectedId: id, pageDet: 0 }));
+          this.toast("Zákazník vytvořen");
+        }
+      },
+
+      openDeleteCustomer: () => this.setState({ modal: "delete", deleteKind: "customer", deleteConfirm: "" }),
+      openDeleteAccount: () => this.setState({ modal: "delete", deleteKind: "account", deleteConfirm: "" }),
+      deleteTitle: deletingCustomer ? "Smazat zákazníka?" : "Smazat účet?",
+      deleteBody: deletingCustomer
+        ? "Smaže se zákazník i všechny jeho činnosti (" + (sel ? st.activities.filter((a) => a.cid === sel.id).length : 0) + " záznamů). Operaci nelze vrátit zpět."
+        : "Smažou se všichni vaši zákazníci (" + st.customers.length + ") a všechny vykázané činnosti (" + st.activities.length + "). Operaci nelze vrátit zpět.",
+      deleteFieldLabel: deletingCustomer ? "Napište název zákazníka" : "Napište SMAZAT ÚČET",
+      deletePhrase: phrase, deleteConfirm: st.deleteConfirm,
+      onDeleteConfirm: (e) => this.setState({ deleteConfirm: e.target.value }),
+      deleteDisabled: !okDelete,
+      deleteBtnStyle: "padding:8px 22px; border:none; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px;" + (okDelete ? "background:#d32f2f; color:#fff; cursor:pointer;" : "background:rgba(0,0,0,.12); color:rgba(0,0,0,.26); cursor:not-allowed;"),
+      confirmDelete: () => {
+        if (!okDelete) return;
+        if (deletingCustomer) {
+          const id = st.selectedId;
+          this.setState((s) => ({ customers: s.customers.filter((c) => c.id !== id), activities: s.activities.filter((a) => a.cid !== id), modal: null, route: "customers", selectedId: null, deleteConfirm: "" }));
+          this.toast("Zákazník a jeho činnosti smazány");
+        } else {
+          this.setState({ modal: null, route: "login", deleteConfirm: "" });
+          this.toast("Účet a všechna data smazány");
+        }
+      },
+
+      snackbar: st.snackbar,
+      terms: [
+        { h: "1. Kdo službu provozuje", p: "Aplikaci Výkazy práce (dále „služba“) provozuje Miroslav Peterka, IČ 00000000, kontakt: podpora@vykazy.cz. Služba slouží k evidenci zákazníků a k vykazování odpracované doby." },
+        { h: "2. Registrace a účet", p: "Službu může používat kdokoli starší 18 let. Registrací potvrzujete, že údaje, které zadáváte, jsou pravdivé, a že odpovídáte za zabezpečení svého hesla. Za činnost provedenou pod vaším účtem odpovídáte vy." },
+        { h: "3. Vaše data", p: "Záznamy, které ve službě vytvoříte, jsou přístupné pouze vám. Provozovatel k nim přistupuje jen v nezbytném rozsahu při řešení technického problému nebo na základě zákonné povinnosti. Data jsou uložena v databázi Google Firebase." },
+        { h: "4. Obsah, který vkládáte", p: "Odpovídáte za obsah, který do služby vkládáte, včetně osobních údajů třetích osob (například kontaktních osob zákazníků). Ve vztahu k těmto údajům jste správcem vy, provozovatel je pouze zpracovatelem. Do služby nesmíte vkládat nezákonný obsah ani ji používat způsobem, který ji poškozuje nebo přetěžuje." },
+        { h: "5. Dostupnost a odpovědnost", p: "Služba je poskytována zdarma a „tak, jak je“, bez záruky dostupnosti, bezchybnosti nebo vhodnosti pro konkrétní účel. Provozovatel neodpovídá za škodu vzniklou používáním služby, ztrátou dat ani za nepřímé škody, zejména ušlý zisk. Doporučujeme si důležitá data zálohovat mimo službu." },
+        { h: "6. Ukončení a smazání účtu", p: "Používání služby můžete kdykoli ukončit. Smazáním profilu v sekci Uživatelský profil se nenávratně odstraní všechna data, která jste ve službě vytvořili. Provozovatel může účet zrušit při porušení těchto podmínek nebo při ukončení provozu služby; o ukončení provozu informuje s přiměřeným předstihem." },
+        { h: "7. Změny podmínek", p: "Provozovatel má právo tyto podmínky kdykoli změnit. Aktuální znění je vždy dostupné v aplikaci. Pokud po zveřejnění změny službu dále používáte, platí, že se změnou souhlasíte. Pokud se změnou nesouhlasíte, můžete svůj účet smazat." },
+        { h: "8. Rozhodné právo", p: "Vztah mezi vámi a provozovatelem se řídí právem České republiky. Případné spory rozhodují české soudy." },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,111 +1,296 @@
-# Obecný popis aplikace:
+# Výkazy práce — zadání aplikace
 
-Aplikace bude sloužit k evidenci zákazníků a vykazovaní práce pro ně odvedenné. Aplikace bude sloužit pro větší množství uživatelů a každy si spravuje pouze své vlastní záznamy. Vzájemě nebude mít uživatel přístup k záznamům ostatních. Tato aplikace bude umožňovat:
+## 1. Obecný popis
 
-- Přihlásit/odhlasit se.
+Aplikace slouží k evidenci zákazníků a vykazování práce pro ně odvedené. Je určena pro větší množství uživatelů, přičemž každý uživatel spravuje pouze své vlastní záznamy — vzájemně nemají uživatelé k záznamům ostatních přístup.
+
+Aplikace umožňuje:
+
+- Přihlásit se / odhlásit se
 - Zakládat a editovat zákazníky
-- Přidávat/vykazovat práci s tím, že se zaznamená začátek a konec práce.
-- Editovat zaznamenanou práci.
-- Počítat odvedenou práci pro jednotlivé zákazníky.
-- Zobrazí přehledy.
-- Toto vše uloží do centrální databáze.
-  Administrace bude probíhat přímo z konzole firebase, kde bude možné spravovat uživatele, zákazníky a činnosti. Uživatelé nebudou mít přístup k administraci a budou spravovat pouze své vlastní záznamy prostřednictvím aplikace.
-  Applikace přístupná komukoliv z internetu a může se libovolně používat.
+- Spouštět a ukončovat činnosti (zaznamená se začátek a konec práce)
+- Editovat a mazat zaznamenanou práci
+- Označovat činnosti jako vyfakturované (s datem DUZP a poznámkou)
+- Počítat odvedenou a vyfakturovanou práci pro jednotlivé zákazníky
+- Zobrazovat přehledy
+- Vše ukládat do centrální databáze
 
-## Základní struktura (layout)
+Administrace probíhá přímo z konzole Firebase, kde je možné spravovat uživatele, zákazníky a činnosti. Uživatelé nemají k administraci přístup a spravují pouze své vlastní záznamy prostřednictvím aplikace.
 
-- Navigační menu v levo
-- Hlavní obsah vpravo - bude zabírat většinu stránky
-- Footer na spodní části stránky - obsahuje odkaz na stránku s podmínkami užití.
+Aplikace je přístupná komukoli z internetu a může se libovolně používat.
 
-## Applikace bude mít 3 sekce (i položky navigačního menu):
+## 2. Vizuální návrh
 
-1. Přehled
-2. Zákazníci
-3. Uživatelský profil
+Závazný vizuální a interakční návrh je ve složce [design_handoff_vykazovani/](design_handoff_vykazovani/):
 
-Bude ještě nultá stránka - přihlašovací/registrační stránka.
+- [Vykazovani.dc.html](design_handoff_vykazovani/Vykazovani.dc.html) — desktopový prototyp (všechny obrazovky a modály)
+- [Vykazovani Mobil.dc.html](design_handoff_vykazovani/Vykazovani%20Mobil.dc.html) — mobilní prototyp
+- [README.md](design_handoff_vykazovani/README.md) — handoff: mapování na MUI komponenty, design tokeny (barvy, typografie, rozestupy, stíny, rozměry), popis obrazovek
 
-### Add 1. Přehled
+Prototypy jsou **designová reference v HTML**, ne produkční kód. Úkolem je je znovu postavit v React + TypeScript + MUI + Emotion; data v prototypu jsou generovaná lokálně a nahradí je dotazy do Firestore. Barvy a typografie odpovídají výchozímu MUI light tématu (primary `#1976d2`) — cílem je dosáhnout stejného výsledku MUI komponentami, ne přepisovat inline styly z prototypu.
 
-Stránka přehledu bude rozdělena na dvě části:
+Design tokeny se v tomto dokumentu nezdvojují; jejich zdrojem je handoff README.
 
-- Tabulka/seznam nedokončené vykázané práce
-  - Na každé položce bude vidět:
-    - Název činnosti
-    - Datum a čas spuštění činnosti
-    - Zákazník
-    - Tlačítko na ukončení činnosti
-- Tabulka/seznam odpracované práce seřezené posledního záznamu. - Na každé položce bude vidět: - Název činnosti - Datum a čas spuštění činnosti - Datum a čas ukončení činnosti - Vykázaná doba - Zákazník
+## 3. Layout a navigace
 
-Je třeba optimalizovat, aby se nenačítali všechny záznamy např pouze 10 (v závislosti na designu zobrazujícího elementu). Klikem na položku se proklikneme do detailu zákazníka, ke kterému položka patří s tím, že se zobrazí editační modální formulář.
+**Desktop:**
 
-V pravém dolním rohu je i tlačítko + pro přidání nové činnosti. Klik na toto tlačítko otevře modální formulář pro zadání nové činnosti. Modální formulář bude obsahovat pole pro zadání názvu činnosti a výběr zákazníka (dropdown seznam všech zákazníků s funkcí full textového vyhledávání) (start=teď).
+- Levé navigační menu, šířka 256 px: logo + název „Výkazy práce“, položky **Přehled** a **Zákazníci**
+- V patě levého menu tlačítko s avatarem, jménem a e-mailem uživatele → vede na **Uživatelský profil** (profil tedy není samostatná položka v seznamu navigace)
+- Horní modrá lišta (AppBar, 64 px) s názvem aktuální stránky; pokud běží alespoň jedna činnost, je vpravo od názvu odznak se zeleným puntíkem a počtem běžících činností
+- Hlavní obsah vpravo, zabírá většinu stránky
+- Footer ve spodní části obsahu: „© Výkazy práce“ a odkaz na **Podmínky použití**
+- Plovoucí tlačítko **+** (FAB) vpravo dole — pouze na stránkách Přehled a Zákazníci
 
-### Add 2. Zákazníci
+**Routy:** `/prihlaseni`, `/prehled`, `/zakaznici`, `/zakaznici/:id`, `/profil`, `/podminky`
 
-Položka menu zákazníci vede do seznamu všech zákazníků (tabulky). Nad tabulkou se bude nacházet okno pro full textové vyhledávání. Tabulka bude nad každým sloupcem obsahovat vyhledavací pole. Tabulka bude načítat pouze omezený počet záznamů (např. 50) a další záznamy jsou schované pomocí stránkování tabulky.
-V pravém dolním rohu bude tlačítko + pro přidání nového zákazníka. Klik na toto tlačítko otevře modální formulář pro zadání nového zákazníka.
-Klikem na položku zákazníka v tabulce se otevře detail zákazníka (ne modální formulář). Detail zákazníka je rozdělen do 2 částí:
+## 4. Obrazovky
 
-- Levá obsahuje atributy zákazníka a možnost jejich editace je zzpřístupněna ikonkou ✏️ v pravém horním rohu (editace je v modálu a uložena po potvrzení).
-- Pravá obsahuje tabulku všech činností spojených s tímto zákazníkem. Klikem na položku činnosti se otevře editační modální formulář. Pokud bude řádek tabulky obsahovat neukončenou činnost, bude zvýrazněn a na jeho konci bude vidět tlačítko na ukončení činnosti. Tabulka opět umožňuje stránkování a omezený počet záznamů na stránku a filtrování nad sloupci. V pravém horním rohu je tlačítko + pro přidání nové činnosti.
-  Zákazníka lze odstranit tlačítkem v detailu zákazníka pomocí kliknutí na ikonu koše 🗑 která je vedle ikony ✏️. Při smazání zákazníka se odstraní i všechny činnosti s ním spojené. Mázaní je opět potřeba potvrdit v dialogu s tím, že je třeba napsat název zakazníka do potvrzovacího pole, aby došlo k jeho odstranění.
+### 4.0 Přihlášení / registrace
 
-Atributy zákazníka:
+Vystředěná karta (max. šířka 420 px) s logem a názvem aplikace nad ní. Obsahuje:
 
-- Název
+- Dvě záložky **PŘIHLÁŠENÍ / REGISTRACE**
+- Pole E-mail a Heslo, v režimu registrace navíc Heslo znovu
+- Odkaz **Zapomenuté heslo?** (reset hesla)
+- Primární tlačítko na celou šířku: PŘIHLÁSIT SE / VYTVOŘIT ÚČET
+- Oddělovač „NEBO“ a tlačítko **POKRAČOVAT S GOOGLE**
+- Pod kartou text „Pokračováním souhlasíte s [podmínkami použití].“ — odkaz vede na stránku podmínek, která je dostupná i nepřihlášenému uživateli
+
+Po úspěšném přihlášení je uživatel přesměrován na Přehled. Při neúspěchu se nad formulářem zobrazí chybová hláška (červený alert). Zde nevymýšlet nic nového, držet se standardního přihlašovacího a registračního procesu.
+
+### 4.1 Přehled
+
+Dvě karty pod sebou, max. šířka obsahu 1280 px.
+
+**Karta „Běžící činnosti“** — hlavička s počtem běžících činností. Tabulka se sloupci:
+
+| Činnost | Zákazník | Začátek | Běží | (akce) |
+
+- Řádky jsou podbarvené (`#fff8e1`), sloupec „Běží“ je zvýrazněn oranžově a průběžně se aktualizuje
+- Na konci řádku tlačítko **UKONČIT** — nastaví konec na aktuální čas
+- Prázdný stav: „Žádná činnost právě neběží. Novou spustíte tlačítkem +.“
+
+**Karta „Odpracovaná práce“** — seřazeno sestupně podle začátku (od nejnovějšího). Sloupce:
+
+| Činnost | Zákazník | Začátek | Konec | Vykázáno | Vyfakturováno | (akce) |
+
+- Sloupec Vyfakturováno je Chip **Ano** (zeleně) / **Ne** (šedě)
+- U ukončených a dosud nevyfakturovaných činností je v řádku tlačítko **VYFAKTUROVAT** → otevře modál Vyfakturovat
+- Načítá se jen omezený počet záznamů: 10 na stránku, dál stránkování („1–10 z N“ + šipky)
+
+**Kliknutí na řádek** (v obou tabulkách) otevře detail zákazníka, ke kterému položka patří, a nad ním editační modál dané činnosti.
+
+**FAB +** vpravo dole otevře modál **Nová činnost** se začátkem = teď a prázdným koncem.
+
+### 4.2 Zákazníci
+
+Jedna karta, max. šířka 1280 px.
+
+- Nad tabulkou pole pro **fulltextové vyhledávání** (hledá napříč všemi atributy zákazníka, tedy i v DIČ, telefonu a e-mailu, které nejsou ve sloupcích) a vpravo počet nalezených záznamů
+- Tabulka se sloupci: **Název | IČ | Adresa | Kontaktní osoba | Vykázáno** (součet ukončených činností zákazníka ve formátu HH:MM)
+- Druhý řádek hlavičky obsahuje **filtr nad každým sloupcem** (kromě sloupce Vykázáno)
+- Stránkování po 50 záznamech („1–50 z N“ + šipky)
+- **FAB +** vpravo dole otevře modál Nový zákazník; po uložení se aplikace přepne rovnou na detail nově založeného zákazníka
+- Kliknutím na řádek se otevře **detail zákazníka** (samostatná obrazovka, ne modál)
+
+### 4.3 Detail zákazníka
+
+Nad obsahem tlačítko **‹ ZPĚT NA ZÁKAZNÍKY**. Obsah tvoří tři karty pod sebou na plnou šířku (max. 1400 px):
+
+**1) Karta údajů** — v hlavičce název zákazníka, vpravo ikony **✏️** (editace v modálu) a **🗑** (smazání). Pod hlavičkou atributy v gridu: IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail.
+
+**2) Karta „Přehled“** — čtyři hodnoty vedle sebe:
+
+- Celkem vykázáno
+- Celkem vyfakturováno (zeleně)
+- Vykázáno tento měsíc
+- Vyfakturováno tento měsíc
+
+**3) Karta „Činnosti“** — v hlavičce počet záznamů a vpravo tlačítko **+ ČINNOST** (otevře modál nové činnosti s předvyplněným zákazníkem). Tabulka se sloupci:
+
+| Činnost | Začátek | Konec | Vykázáno | Vyfakturováno | DUZP | Poznámka | (akce) |
+
+- Filtry ve druhém řádku hlavičky: text na Činnost, „dd.mm.“ na Začátek, select **Vše / Vyfakturováno / Nevyfakturováno**, text na Poznámku
+- Neukončené činnosti mají podbarvený řádek a tlačítko **UKONČIT**
+- Ukončené a nevyfakturované mají tlačítko **VYFAKTUROVAT**
+- Kliknutím na řádek se otevře editační modál činnosti
+- Stránkování po 10 záznamech
+
+**Smazání zákazníka** (ikona 🗑) otevře potvrzovací dialog s počtem dotčených činností; smazání je nutné potvrdit **opsáním přesného názvu zákazníka**. Smaže se zákazník i všechny jeho činnosti.
+
+### 4.4 Uživatelský profil
+
+Max. šířka 640 px, dvě karty:
+
+**1) Karta profilu** — avatar, jméno, e-mail, tři statistiky (Zákazníků, Činností, Celkem vykázáno) a tlačítko **ODHLÁSIT SE**.
+
+**2) Karta „Smazání účtu“** — červený nadpis, vysvětlení („Smazáním účtu se nenávratně odstraní všichni vaši zákazníci a všechny vykázané činnosti. Operaci nelze vrátit zpět.“) a tlačítko **SMAZAT ÚČET** → dialog s opsáním přesné fráze `SMAZAT ÚČET`.
+
+### 4.5 Podmínky použití
+
+Samostatná stránka (karta max. 820 px) s nadpisem, datem účinnosti a očíslovanými sekcemi. Odkaz na ni je ve footeru každé stránky i pod přihlašovací kartou. Podrobnosti viz kapitola 12.
+
+## 5. Modální okna
+
+| Modál | Obsah a chování |
+| --- | --- |
+| **Nová / editace činnosti** | Název činnosti; Zákazník (našeptávač s fulltextem, u nové činnosti z Přehledu prázdný, z detailu předvyplněný); Začátek a Konec (`datetime-local`); read-only **Vykázaná doba** ve formátu HH:MM (u běžící činnosti text „běží“); přepínač **Vyfakturováno**; **DUZP** (zobrazí se po zapnutí přepínače, předvyplněné dnešním datem); **Poznámka**. Akce: **SMAZAT** (pouze při editaci, vlevo), ZRUŠIT, **ULOŽIT** / **SPUSTIT**. |
+| **Nový / editace zákazníka** | Grid o dvou sloupcích: Název (přes celou šířku), IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail. Akce: ZRUŠIT, ULOŽIT. |
+| **Vyfakturovat** | Podtitul „činnost · zákazník · doba“, **DUZP** (předvyplněno dnešní datum) a **Poznámka** (předvyplněná poznámkou činnosti). Potvrzení nastaví `invoiced = true`, uloží DUZP i poznámku. |
+| **Smazání (zákazník / účet)** | Titulek, počty dotčených záznamů, pole pro opsání přesné fráze a nápověda s přesným textem. Tlačítko **SMAZAT NENÁVRATNĚ** je aktivní až při přesné shodě. |
+
+## 6. Datové entity
+
+### Zákazník
+
+- Název (povinné)
 - IČ
 - DIČ
 - Adresa
 - Kontaktní osoba
 - Telefon
-- Email
+- E-mail
 
-Atributy činnosti:
+### Činnost
 
-- Název činnosti
+- Název činnosti (povinné)
+- Zákazník (povinné)
 - Datum a čas spuštění činnosti
-- Datum a čas ukončení činnosti
-- Vykázaná doba (dopočtené pole - Read only) (Vizualizované všude ve struktuře HH:MM (nezobrazujeme sekundy níže))
-- Zákazník
+- Datum a čas ukončení činnosti (prázdné = činnost běží)
+- Vykázaná doba (dopočtené pole, read-only; všude zobrazeno ve formátu **HH:MM**, bez sekund; hodiny mohou přesáhnout 24)
+- **Vyfakturováno** (ano/ne)
+- **DUZP** (datum uskutečnění zdanitelného plnění; vyplňuje se při označení jako vyfakturováno, předvyplní se dnešní datum)
+- **Poznámka** (volný text; např. číslo faktury, „Součást paušálu“, „Odsouhlaseno e-mailem“)
 
-### Uživatelský profil
+## 7. Pravidla a chování
 
-Zde bude možné se odhlásit a nechat svůj účet smazat. Při smazání účtu budou odstraněny všechny záznamy spojené s tímto uživatelem.
+### Čas a výpočet doby
 
-## Přihlašovací/registrační stránka
+- Doba = `konec − začátek`, zaokrouhleno na minuty, formát `HH:MM`
+- Rozdíl se počítá z **absolutních časů (UTC instantů)**, ne z lokálních složek data a času. Den přechodu na letní/zimní čas má 23, resp. 25 hodin a činnost přes tuto hranici musí vyjít správně
+- Do Firestore se ukládá `Timestamp`, zobrazuje se v zóně **Europe/Prague**, formát data `DD.MM.YYYY HH:MM`
+- Pokud se časová zóna začátku a konce liší (činnost přes změnu času), zobrazí modál u vykázané doby poznámku „zahrnuje změnu času“
+- Agregace podle kalendářního dne/měsíce („tento měsíc“) se počítají v zóně Europe/Prague
 
-Přihlašovací/registrační stránka bude obsahovat pole pro zadání emailu a hesla. Po úspěšném přihlášení bude uživatel přesměrován na stránku přehledu. V případě neúspěšného přihlášení se zobrazí chybová hláška. Pro nové uživatele bude k dispozici možnost registrace. Dále je třeba:
+### Životní cyklus činnosti
 
-- Přihlašovaní pomocí google účtu
-- Reset hesla
-  Zde nevymýšlet nic nového, držet se standardního přihlašovacího a registračního procesu.
+- **Spuštění:** FAB na Přehledu → modál, začátek = teď, konec prázdný
+- **Ukončení:** tlačítko UKONČIT nastaví konec na aktuální čas, doba se dopočítá
+- **Paralelní běh více činností je povolen**
+- Činnost lze zadat i zpětně — začátek i konec jsou v modálu volně editovatelné
+- Činnost lze smazat z editačního modálu
 
-## Podmínky použití
+### Validace
 
-- Je třeba vydefinovat podmínky použití, kterého mě budou chránit a zároveň informovat uživatele o jejich právech a povinnostech při používání aplikace. Je třeba zmínit, že mám právo podmínky kdykoli měnit. Pokud budou kdykoli přestat aplikaci používat, mohou smazat svůj profíl a tím se mažou i veškerá data, která kdy vytvořila.
+- Činnost vyžaduje název a zákazníka
+- Zákazník vyžaduje název
+- Konec nesmí předcházet začátku
+- Mazací tlačítko je aktivní jen při přesné shodě potvrzovací fráze
 
-# Obecné
+### Hledání, filtry a stránkování
 
-- Je možné paralelní běh činností.
-- Je třeba řešit změnu letního a zimního času (zkrácení/ prodloužení dne o hodiny v lomové dny).
+- Fulltext na stránce Zákazníci hledá napříč všemi atributy zákazníka
+- Filtry nad sloupci se kombinují logickým **AND** (i s fulltextem); změna kteréhokoli filtru resetuje stránkování na první stránku
+- Počty záznamů na stránku: Přehled 10, Zákazníci 50, Činnosti v detailu 10 (mobil 8 / 20 / 8)
 
-# Technologie a design:
+### Zpětná vazba a stavy
 
-- Frontend: React, TypeScript
-- Backend: Firebase Functions -> pro hromadné operace jako např mazání uživatele
-- Hosting: Firebase
-- Databáze: Firebase Firestore
-- UI knihovna: Material-UI
-- Autentizace: Firebase
-- Stylování: CSS-in-JS (Emotion)
+- Potvrzení akcí přes Snackbar vlevo dole (cca 2,6 s): „Činnost spuštěna“, „Činnost ukončena“, „Činnost uložena“, „Činnost smazána“, „Zákazník uložen“, „Zákazník vytvořen“, „Zákazník a jeho činnosti smazány“, „Označeno jako vyfakturováno“, „Účet a všechna data smazány“
+- Prázdné stavy: „Žádná činnost právě neběží. Novou spustíte tlačítkem +.“, „Nic nenalezeno“ v našeptávači zákazníků
+- Chybové stavy přihlášení: alert nad formulářem
 
-# Zabezpečení
+## 8. Mobilní verze
 
-- Autentizace pomocí Firebase, včetně podpory Google účtu a resetu hesla.
-- Logika stukturování dat pro různé uživatele bude:
-  - Každý uživatel bude mít přístup pouze ke svým vlastním zákazníkům a činnostem.
-  - Data budou uložena ve Firebase Firestore s odpovídajícími bezpečnostními pravidly pro omezení přístupu.
-  - Při načítání dat bude aplikace filtrovat záznamy podle aktuálně přihlášeného uživatele.
-  - Firestore rules budou definovat přístupová práva tak, aby každý uživatel mohl číst a zapisovat pouze své vlastní záznamy.
+Stejné funkce, jiné vzory (viz mobilní prototyp):
+
+- Dolní navigace **BottomNavigation** (Přehled, Zákazníci, Profil), horní AppBar s titulkem; v detailu zákazníka šipka zpět a ikony ✏️ 🗑 vpravo
+- Tabulky nahrazeny **seznamy karet**: běžící činnost (podbarvená, doba + UKONČIT), odpracovaná práce (název, zákazník, čas → čas, doba, Chip stavu, tlačítko VYFAKTUROVAT)
+- Zákazníci: pole hledání nad seznamem, řádky s adresou a součtem
+- Detail: statistiky v gridu 2×2, pod tím atributy, pod tím seznam činností
+- Všechny modály jako **bottom sheety** (zaoblení nahoře, max. výška 88 %, animace zespodu)
+- Dotykové cíle min. 44 px, pole Začátek/Konec pod sebou
+- Odkaz na podmínky použití je v profilu
+
+## 9. Datový model (návrh)
+
+```
+users/{uid}/customers/{customerId}
+  { name, ico, dic, address, person, phone, email, createdAt, updatedAt }
+
+users/{uid}/activities/{activityId}
+  { customerId, name,
+    start: Timestamp,
+    end: Timestamp | null,          // null = běží
+    durationMinutes: number | null, // dopočteno při uložení/ukončení
+    invoiced: boolean,
+    invoiceDate: Timestamp | null,  // DUZP
+    note: string,
+    createdAt, updatedAt }
+```
+
+Poznámky k modelu:
+
+- Činnosti jsou samostatná kolekce pod uživatelem (**ne** podkolekce zákazníka), aby šel udělat dotaz „posledních 10 činností napříč všemi zákazníky“ pro Přehled
+- `durationMinutes` se ukládá proto, aby šly součty („Vykázáno“ ve sloupci zákazníka, statistiky v detailu) počítat agregačním dotazem nebo průběžně udržovaným součtem, ne načtením všech činností na klienta
+- **Zákazníci se pro přihlášeného uživatele načítají celí na klienta** (jde o desítky až stovky záznamů) a fulltext, filtry nad sloupci i stránkování běží lokálně — Firestore neumí substring hledání ani kombinaci filtrů nad více sloupci. **Činnosti** se naopak stránkují serverově kurzorem
+- Indexy: `activities` podle `start desc` a `customerId + start desc`; běžící činnosti podle `end == null`
+- Kaskádní smazání zákazníka a smazání účtu řeší **Firebase Function** (batch po 500 dokumentech); smazání uživatele ve Firebase Auth navíc vyžaduje čerstvé přihlášení
+
+## 10. Technologie
+
+- **Frontend:** React, TypeScript
+- **Backend:** Firebase Functions — pro hromadné operace, např. smazání účtu a kaskádní smazání zákazníka
+- **Databáze:** Firebase Firestore
+- **Autentizace:** Firebase Authentication (e-mail + heslo, Google, reset hesla)
+- **Hosting:** Firebase Hosting
+- **UI knihovna:** Material-UI (výchozí light téma, primary `#1976d2`)
+- **Stylování:** CSS-in-JS (Emotion)
+- **Ikony:** `@mui/icons-material` (znaky v prototypu jsou jen zástupné)
+- **Jazyk UI:** čeština
+
+Mapování prvků prototypu na MUI komponenty je v [handoff README](design_handoff_vykazovani/README.md).
+
+## 11. Zabezpečení
+
+- Autentizace pomocí Firebase, včetně podpory Google účtu a resetu hesla
+- Každý uživatel má přístup pouze ke svým vlastním zákazníkům a činnostem
+- **Firestore Security Rules jsou jediná autorizační vrstva** — povolují čtení i zápis jen tam, kde `request.auth.uid` odpovídá vlastníkovi dokumentu (`users/{uid}/…`)
+- Aplikace při načítání dat pracuje vždy jen nad podstromem přihlášeného uživatele
+- Doplňkově (ochrana kvót, **nikoli** bezpečnostní opatření): omezení API klíče na doménu hostingu a nastavení Authorized domains ve Firebase Auth
+- Vzhledem k tomu, že registrace je otevřená komukoli, zvážit **Firebase App Check** proti botům a nastavit rozpočtové upozornění na projektu
+
+## 12. Podmínky použití
+
+Podmínky mají chránit provozovatele a zároveň informovat uživatele o jejich právech a povinnostech. Návrh textu je součástí prototypu a obsahuje 8 sekcí:
+
+1. Kdo službu provozuje
+2. Registrace a účet
+3. Vaše data
+4. Obsah, který vkládáte (uživatel je správcem osobních údajů třetích osob, provozovatel zpracovatelem)
+5. Dostupnost a odpovědnost (služba zdarma, „tak, jak je“, bez záruky dostupnosti a záloh)
+6. Ukončení a smazání účtu (smazáním profilu se nenávratně odstraní všechna vytvořená data)
+7. Změny podmínek (provozovatel má právo podmínky kdykoli změnit)
+8. Rozhodné právo
+
+Před spuštěním je potřeba:
+
+- Doplnit IČ a kontakt provozovatele a datum účinnosti
+- Nechat text **projít právní revizí** — jde o návrh, ne o hotový právní dokument
+- Doplnit **zásady ochrany osobních údajů** (privacy policy). Aplikace ukládá osobní údaje třetích osob (kontaktní osoba, telefon, e-mail zákazníka) a odkaz na privacy policy vyžaduje i Google OAuth consent screen
+
+## 13. Otevřené otázky a rozsah v1
+
+Rozhodnout před implementací:
+
+- **Souhlas s podmínkami při registraci** — prototyp má jen informativní text „Pokračováním souhlasíte s podmínkami použití“. Stačí to, nebo chceme povinný checkbox?
+- **DUZP při fakturaci** — má být povinné, když je zapnuté Vyfakturováno?
+- **Ověření e-mailu po registraci** — vyžadovat, nebo ne? A jak se chovat při kolizi, kdy stejný e-mail přijde přes Google i přes heslo?
+
+Vědomě **mimo rozsah v1** (není v návrhu):
+
+- Export podkladů pro fakturaci (CSV/XLSX) za zákazníka a období
+- Předvyplnění zákazníka z ARES podle IČ a validace IČ/DIČ
+- Archivace zákazníka místo mazání
+- Sazby, fakturovatelnost v penězích, generování faktur
+- Upozornění na zapomenutou běžící činnost
