@@ -19,7 +19,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import { BrandMark } from '../components/BrandMark';
-import { GoogleIcon } from '../components/GoogleIcon';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
 import {
   registerWithEmail,
   sendPasswordReset,
@@ -120,16 +120,7 @@ export function LoginPage() {
 
             <Divider sx={{ my: 2.5 }}>NEBO</Divider>
 
-            <Button
-              fullWidth
-              variant="outlined"
-              color="inherit"
-              startIcon={<GoogleIcon sx={{ fontSize: 18 }} />}
-              disabled={busy}
-              onClick={() => void run(signInWithGoogle)}
-            >
-              Pokračovat s Google
-            </Button>
+            <GoogleSignInButton disabled={busy} onClick={() => void run(signInWithGoogle)} />
           </Box>
         </Paper>
 
