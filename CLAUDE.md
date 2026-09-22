@@ -30,6 +30,19 @@ Lokální vývoj běží proti emulátorům: `.env.local` míří na projekt `de
 nikdy nepustí project ID s prefixem `demo-` na ostré služby, takže v něm nejsou žádné
 skutečné klíče. Ostrá konfigurace se bere z `.env` podle [.env.example](.env.example).
 
+## PWA
+
+Aplikace jde nainstalovat jako samostatné okno (`display: standalone`). Manifest a service
+worker generuje `vite-plugin-pwa` při buildu, ve vývojovém režimu se neregistrují.
+
+- Ikony v `public/` vycházejí z loga v návrhu; generují se skriptem přes headless prohlížeč,
+  nejsou kreslené ručně.
+- Service worker předem ukládá jen vlastní přeložené soubory. **Do volání na Firebase
+  nezasahuje** — data tak nikdy nejdou z cache a nemůžou se tvářit čerstvěji, než jsou.
+- `sw.js`, `registerSW.js`, `index.html` a manifest mají v `firebase.json` nastavené
+  `no-cache`. Kdyby se service worker kešoval, prohlížeč by novou verzi nikdy nenašel.
+- Offline funguje samotná aplikace, ne data — Firestore offline persistence zapnutá není.
+
 ## Zdroj designu (přečíst před implementací UI)
 
 Složka [design_handoff_vykazovani/](design_handoff_vykazovani/) je **vizuální zdroj pravdy**:
