@@ -12,7 +12,12 @@ export interface LegalDocumentProps {
   sections: TermsSection[];
 }
 
-/** Sdílené vykreslení právních textů — podmínek i zásad ochrany údajů. */
+/**
+ * Sdílené vykreslení právních textů — podmínek i zásad ochrany údajů.
+ *
+ * Poznámka „návrh k právní revizi“ patří do zdrojáku a do zprávy provozovateli,
+ * ne na stránku, kterou čtou uživatelé.
+ */
 export function LegalDocument({ title, effectiveFrom, sections }: LegalDocumentProps) {
   return (
     <Paper sx={{ maxWidth: layout.termsMaxWidth, p: { xs: 3, sm: 5 } }}>
@@ -20,7 +25,7 @@ export function LegalDocument({ title, effectiveFrom, sections }: LegalDocumentP
         {title}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-        Účinné od {effectiveFrom}. Návrh k právní revizi.
+        Účinné od {effectiveFrom}.
       </Typography>
       <Stack spacing={3}>
         {sections.map((section) => (

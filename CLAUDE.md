@@ -20,6 +20,11 @@ Zadání je v [readme.md](readme.md), plán implementace vznikl v plan módu a r
 - `npm run test:rules` — testy bezpečnostních pravidel; emulátor si spustí a zase zhasne samy
 - `npm --prefix functions run build` — překlad Cloud Functions; emulátor i nasazení čtou `functions/lib`
 - `npm run build` — build do `dist/`
+- `npm run deploy` — build a nasazení do Firebase (hosting, rules, indexy, funkce);
+  functions se překládají automaticky přes predeploy hook
+
+Ostrý projekt je `vykazy-prace-cb9d5`, hosting běží na cíli `app` → `vykazovatko.web.app`.
+Konfigurace pro build je v `.env.production` (mimo git).
 
 Lokální vývoj běží proti emulátorům: `.env.local` míří na projekt `demo-vykazy`. Firebase
 nikdy nepustí project ID s prefixem `demo-` na ostré služby, takže v něm nejsou žádné

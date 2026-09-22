@@ -3,9 +3,8 @@ import type { TermsSection } from './terms';
 /**
  * Zásady ochrany osobních údajů — NÁVRH K PRÁVNÍ REVIZI.
  *
- * Před spuštěním doplnit údaje provozovatele (sekce 1) a datum účinnosti.
- * Odkaz na tuto stránku vyžaduje i Google OAuth consent screen, bez něj
- * Google přihlašování neschválí.
+ * Údaje provozovatele a datum účinnosti jsou doplněné; text sám ale právníkem
+ * neprošel. Odkaz na tuto stránku vyžaduje i Google OAuth consent screen.
  */
 
 export const PRIVACY_VERSION = '2026-09-22';
@@ -14,7 +13,7 @@ export const PRIVACY_EFFECTIVE_FROM = '22. 9. 2026';
 export const privacySections: TermsSection[] = [
   {
     heading: '1. Kdo údaje zpracovává',
-    body: 'Aplikaci Výkazy práce provozuje Miroslav Peterka, IČ 00000000, kontakt: podpora@vykazy.cz (dále „provozovatel“). Na otázky k ochraně osobních údajů odpovídá provozovatel na uvedeném e-mailu.',
+    body: 'Aplikaci Výkazy práce provozuje Miroslav Peterka, kontakt: miroslav.peterka1@seznam.cz (dále „provozovatel“). Služba je poskytována bezplatně. Na otázky k ochraně osobních údajů odpovídá provozovatel na uvedeném e-mailu.',
   },
   {
     heading: '2. Jaké údaje o vás zpracováváme',
@@ -42,7 +41,7 @@ export const privacySections: TermsSection[] = [
   },
   {
     heading: '8. Cookies a úložiště prohlížeče',
-    body: 'Aplikace nepoužívá analytické ani reklamní cookies a nikoho nesleduje. Do úložiště vašeho prohlížeče ukládáme pouze údaje nezbytné k tomu, abyste zůstali přihlášeni. Bez nich by služba nefungovala, proto k nim nepotřebujeme váš souhlas.',
+    body: 'Aplikace nepoužívá analytické ani reklamní cookies a nikoho nesleduje. Google Analytics není v aplikaci zapnuté. Do úložiště vašeho prohlížeče ukládáme pouze údaje nezbytné k tomu, abyste zůstali přihlášeni. Bez nich by služba nefungovala, proto k nim nepotřebujeme váš souhlas.',
   },
   {
     heading: '9. Zabezpečení',

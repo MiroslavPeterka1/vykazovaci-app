@@ -1,9 +1,8 @@
 /**
  * Text podmínek použití, převzatý doslovně z vizuálního návrhu.
  *
- * POZOR: jde o návrh k právní revizi. Před spuštěním je třeba doplnit IČ a kontakt
- * provozovatele (sekce 1), datum účinnosti a samostatné zásady ochrany osobních údajů
- * — ty vyžaduje i Google OAuth consent screen.
+ * POZOR: jde o návrh k právní revizi. Údaje provozovatele a datum účinnosti jsou
+ * doplněné; text sám ale právníkem neprošel.
  */
 
 export interface TermsSection {
@@ -12,14 +11,14 @@ export interface TermsSection {
 }
 
 /** Zvyšuje se při každé změně textu; ukládá se k souhlasu uživatele. */
-export const TERMS_VERSION = '2026-09-21';
+export const TERMS_VERSION = '2026-09-22';
 
-export const TERMS_EFFECTIVE_FROM = '21. 9. 2026';
+export const TERMS_EFFECTIVE_FROM = '22. 9. 2026';
 
 export const termsSections: TermsSection[] = [
   {
     heading: '1. Kdo službu provozuje',
-    body: 'Aplikaci Výkazy práce (dále „služba“) provozuje Miroslav Peterka, IČ 00000000, kontakt: podpora@vykazy.cz. Služba slouží k evidenci zákazníků a k vykazování odpracované doby.',
+    body: 'Aplikaci Výkazy práce (dále „služba“) provozuje Miroslav Peterka, kontakt: miroslav.peterka1@seznam.cz. Služba slouží k evidenci zákazníků a k vykazování odpracované doby. Je poskytována bezplatně a nejde o podnikatelskou činnost — provozovatel ji nabízí jako volně dostupný nástroj.',
   },
   {
     heading: '2. Registrace a účet',

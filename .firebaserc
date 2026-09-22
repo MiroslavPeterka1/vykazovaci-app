@@ -1,5 +1,14 @@
 {
   "projects": {
-    "default": "demo-vykazy"
+    "default": "vykazy-prace-cb9d5"
+  },
+  "targets": {
+    "vykazy-prace-cb9d5": {
+      "hosting": {
+        "app": [
+          "vykazovatko"
+        ]
+      }
+    }
   }
 }

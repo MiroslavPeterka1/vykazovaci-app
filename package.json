@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "emulators": "firebase emulators:start",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-vykazy \"vitest run --config vitest.rules.config.ts\""
+    "test:rules": "firebase emulators:exec --only firestore --project demo-vykazy \"vitest run --config vitest.rules.config.ts\"",
+    "deploy": "npm run build && firebase deploy"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
