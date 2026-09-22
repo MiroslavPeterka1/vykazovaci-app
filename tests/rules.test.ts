@@ -5,7 +5,15 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+  updateDoc,
+  Timestamp,
+} from 'firebase/firestore';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 let testEnv: RulesTestEnvironment;
@@ -171,8 +179,60 @@ describe('profil', () => {
     await assertFails(deleteDoc(doc(alice(), 'users', ALICE)));
   });
 
-  it('profil bez e-mailu neprojde', async () => {
-    await assertFails(setDoc(doc(alice(), 'users', ALICE), { displayName: 'Alice' }));
+  it('nový profil bez e-mailu neprojde', async () => {
+    await assertFails(setDoc(doc(bob(), 'users', BOB), { displayName: 'Bob' }));
+  });
+
+  // Přesná sekvence z aplikace: registrace založí profil a profil pak mění jméno.
+  it('po registraci lze změnit jméno', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await deleteDoc(doc(context.firestore(), 'users', BOB));
+    });
+    await assertSucceeds(
+      setDoc(doc(bob(), 'users', BOB), {
+        displayName: 'Bob',
+        email: 'bob@example.cz',
+        termsAcceptedAt: serverTimestamp(),
+        termsVersion: '2026-09-21',
+        createdAt: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(doc(bob(), 'users', BOB), {
+        displayName: 'Bobík',
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  // Přesně to, co při registraci zapisuje ensureUserProfile.
+  it('registrace založí profil', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await deleteDoc(doc(context.firestore(), 'users', BOB));
+    });
+    await assertSucceeds(
+      setDoc(doc(bob(), 'users', BOB), {
+        displayName: 'Bob',
+        email: 'bob@example.cz',
+        termsAcceptedAt: serverTimestamp(),
+        termsVersion: '2026-09-21',
+        createdAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  // Přesně to, co dělá změna jména v profilu: dílčí update bez e-mailu.
+  it('změna jména projde, i když update e-mail znovu neposílá', async () => {
+    await assertSucceeds(updateDoc(doc(alice(), 'users', ALICE), { displayName: 'Alice Nová' }));
+  });
+
+  it('změna jména projde i se serverovým časem, jak ji posílá aplikace', async () => {
+    await assertSucceeds(
+      updateDoc(doc(alice(), 'users', ALICE), {
+        displayName: 'Alice Nová',
+        updatedAt: serverTimestamp(),
+      }),
+    );
   });
 });
 

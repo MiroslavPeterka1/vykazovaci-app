@@ -257,6 +257,9 @@ function AppFooter() {
       <Link component={RouterLink} to="/podminky" variant="body2">
         Podmínky použití
       </Link>
+      <Link component={RouterLink} to="/ochrana-osobnich-udaju" variant="body2">
+        Ochrana osobních údajů
+      </Link>
     </Box>
   );
 }

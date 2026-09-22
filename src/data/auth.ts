@@ -65,8 +65,11 @@ export async function registerWithEmail({
   password,
 }: RegisterInput): Promise<void> {
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(user, { displayName });
+  // Profil první: aplikace se přesměruje hned, jak Firebase ohlásí přihlášení,
+  // takže zbytek registrace doběhne až „za“ odchodem z přihlašovací stránky.
+  // Kdyby ji uživatel v tu chvíli obnovil, musí být uložené aspoň tohle.
   await ensureUserProfile(user, displayName);
+  await updateProfile(user, { displayName });
   await sendEmailVerification(user);
 }
 

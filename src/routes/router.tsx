@@ -5,13 +5,33 @@ import { CustomerDetailPage } from '../pages/CustomerDetailPage';
 import { CustomersPage } from '../pages/CustomersPage';
 import { LoginPage } from '../pages/LoginPage';
 import { OverviewPage } from '../pages/OverviewPage';
-import { PlaceholderPage } from '../pages/PlaceholderPage';
+import { PrivacyPage } from '../pages/PrivacyPage';
+import { ProfilePage } from '../pages/ProfilePage';
+import { TermsPage } from '../pages/TermsPage';
+import { LegalRoute } from './LegalRoute';
 import { RequireAuth } from './RequireAuth';
-import { TermsRoute } from './TermsRoute';
+
+export const PRIVACY_PATH = '/ochrana-osobnich-udaju';
+export const TERMS_PATH = '/podminky';
 
 export const router = createBrowserRouter([
   { path: '/prihlaseni', element: <LoginPage /> },
-  { path: '/podminky', element: <TermsRoute /> },
+  {
+    path: TERMS_PATH,
+    element: (
+      <LegalRoute>
+        <TermsPage />
+      </LegalRoute>
+    ),
+  },
+  {
+    path: PRIVACY_PATH,
+    element: (
+      <LegalRoute>
+        <PrivacyPage />
+      </LegalRoute>
+    ),
+  },
   {
     element: <RequireAuth />,
     children: [
@@ -21,7 +41,7 @@ export const router = createBrowserRouter([
           { path: '/prehled', element: <OverviewPage /> },
           { path: '/zakaznici', element: <CustomersPage /> },
           { path: '/zakaznici/:id', element: <CustomerDetailPage /> },
-          { path: '/profil', element: <PlaceholderPage title="Uživatelský profil" /> },
+          { path: '/profil', element: <ProfilePage /> },
         ],
       },
     ],

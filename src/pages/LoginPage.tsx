@@ -134,6 +134,10 @@ export function LoginPage() {
           Pokračováním souhlasíte s{' '}
           <Link component={RouterLink} to="/podminky">
             podmínkami použití
+          </Link>{' '}
+          a berete na vědomí{' '}
+          <Link component={RouterLink} to="/ochrana-osobnich-udaju">
+            zásady ochrany osobních údajů
           </Link>
           .
         </Typography>
