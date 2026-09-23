@@ -1,182 +1,122 @@
-# Handoff: Výkazy práce (evidence zákazníků a vykazování práce)
-
-> **Změny v této verzi (2026-09-23)** — aplikace už existuje, implementujte jen tyto dvě úpravy:
-> 1. **Poznámka u zákazníka** — nové pole `note` (viz sekce 3 a modál zákazníka).
-> 2. **Export pracovního výkazu do Excelu** za měsíc a za rok (viz sekce „Export do Excelu“ a soubor `Export Excel.dc.html`).
->
-> Zbytek dokumentu popisuje celý návrh jako referenci. Vše ostatní už je implementováno — neměňte to, pokud se to s novými úpravami nekříží.
+# Handoff: Vykazovátko – landing page
 
 ## Overview
-Webová aplikace pro evidenci zákazníků a vykazování odvedené práce. Každý uživatel vidí a spravuje pouze svoje záznamy. Uživatel zakládá zákazníky, spouští a ukončuje činnosti (možný paralelní běh), edituje je, označuje je jako vyfakturované s DUZP a poznámkou a sleduje součty. Administrace probíhá mimo aplikaci, přímo v konzoli Firebase.
+Jednostránkový statický web, který představuje aplikaci Výkazy práce (`https://vykazovatko.web.app`) a odkazuje do ní. Web poběží na **Cloudflare Pages** a má ho indexovat Google. Aplikace sama má `noindex`, takže landing page je jediná indexovaná vstupní stránka.
 
-Cílový stack podle zadání: React + TypeScript, Material-UI, Emotion, Firebase Auth (e-mail/heslo, Google, reset hesla), Firestore, Firebase Functions (hromadné operace, např. smazání účtu), Firebase Hosting.
+Obsah stojí na třech sdělení:
+1. k čemu aplikace slouží,
+2. je celá zdarma a neexistuje placená verze,
+3. data nikdo jiný nevyužívá a smazáním účtu se automaticky smažou všechna.
 
 ## About the Design Files
-Soubory v tomto balíčku jsou **designová reference vytvořená v HTML** — prototypy, které ukazují zamýšlený vzhled a chování. Nejde o produkční kód k překopírování. Úkolem je tyto návrhy **znovu postavit v cílovém prostředí** (React + TypeScript + MUI + Emotion) podle jeho zavedených vzorů; data v prototypu jsou generovaná lokálně a musí být nahrazena Firestore dotazy.
+`Landing Page.dc.html` je **designová reference v HTML**, ne kód k nasazení. Běží na runtime prototypu (`support.js`), který obsah vykreslí JavaScriptem. Pro SEO je to nevhodné, proto stránku **znovu postavte jako čistý statický HTML soubor**, kde je veškerý text přímo v markupu.
 
-`.dc.html` soubory otevřete přímo v prohlížeči (potřebují `support.js` ve stejné složce; mobilní verze navíc `ios-frame.jsx`). Struktura souboru: šablona (markup) + třída `Component` s logikou — logika je běžný React class-component bez `render()`, `renderVals()` vrací hodnoty do šablony.
+Náhled: otevřete `Landing Page.dc.html` v prohlížeči. `support.js`, `image-slot.js` a `.image-slots.state.json` musí ležet ve stejné složce. Obsah karet (sekce „K čemu slouží“ a „Vaše data patří jen vám“) je v poli `features` / `promises` ve třídě `Component` na konci souboru.
+
+## Doporučená implementace
+- **Umístění:** nový adresář `landing/` v repozitáři `vykazovaci-app` (nebo samostatné repo). Nesmí zasahovat do buildu aplikace (`dist/`, Firebase hosting).
+- **Technologie:** čistý `index.html` + jeden `styles.css`, bez frameworku a bez JavaScriptu. Nic z toho, co stránka dělá, JS nepotřebuje.
+- **Cloudflare Pages:** build command žádný, output directory `landing/`.
+- **Soubory k vytvoření:**
+  - `landing/index.html`
+  - `landing/styles.css`
+  - `landing/assets/screenshot-prehled.webp` (+ ideálně `@2x`)
+  - `landing/favicon.ico`, `landing/apple-touch-icon.png` (zkopírovat z `public/` aplikace)
+  - `landing/og-image.png` (1200×630, pro sdílení)
+  - `landing/robots.txt` (`User-agent: *`, `Allow: /`, `Sitemap: https://<doména>/sitemap.xml`)
+  - `landing/sitemap.xml` (jedna URL)
+  - `landing/_headers` (Cloudflare: cache pro `/assets/*`, bezpečnostní hlavičky)
+  - `landing/404.html` (jednoduchá, s odkazem na úvod)
+
+## SEO a `<head>`
+- `<html lang="cs">`
+- `<title>Vykazovátko – bezplatná evidence zákazníků a výkazů práce</title>`
+- `<meta name="description" content="Vykazovátko je bezplatná webová aplikace pro evidenci zákazníků a vykazování odpracovaného času. Vaše data vidíte jen vy a smazáním účtu zmizí všechna.">`
+- `<link rel="canonical" href="https://<doména landing page>/">` — doménu doplní uživatel
+- Open Graph: `og:type=website`, `og:title`, `og:description`, `og:url`, `og:image`, `og:locale=cs_CZ`; `twitter:card=summary_large_image`
+- `<meta name="theme-color" content="#1976d2">`
+- Strukturovaná data JSON-LD `SoftwareApplication`: `name` „Vykazovátko“, `applicationCategory` „BusinessApplication“, `operatingSystem` „Web“, `url` `https://vykazovatko.web.app`, `offers` `{ "@type": "Offer", "price": "0", "priceCurrency": "CZK" }`, `inLanguage` „cs“
+- Jeden `<h1>`, sekce s `<h2>`, karty s `<h3>` (hierarchie odpovídá návrhu)
+- Screenshot: `<img>` s `alt="Přehled běžících a odpracovaných činností v aplikaci Vykazovátko"`, `width`/`height` kvůli CLS, `fetchpriority="high"` (je nad ohybem)
+- Fonty: Google Fonts Roboto 400/500/700 + Roboto Mono 500, `display=swap`, `preconnect`. Volitelně self-hostovat.
 
 ## Fidelity
-**High-fidelity.** Barvy, typografie, rozestupy a interakce odpovídají výchozímu MUI tématu (light, primary `#1976d2`). Cílem je v MUI komponentách dosáhnout stejného výsledku — ne přepisovat inline styly z prototypu. Prototyp je inline-stylovaný jen proto, že jde o HTML návrh.
+**High-fidelity.** Barvy, písmo a rozměry odpovídají tématu aplikace (`src/theme.ts`, výchozí MUI light). Texty použijte **doslova** tak, jak jsou v návrhu.
 
-Mapování na MUI komponenty:
-| Prvek prototypu | MUI |
-| --- | --- |
-| Levé menu | `Drawer` variant="permanent", šířka 256 |
-| Horní modrá lišta | `AppBar` + `Toolbar`, `color="primary"` |
-| Karty | `Paper` elevation={1} |
-| Tabulky | `Table` / `TableContainer` + `TablePagination` |
-| Pole formulářů | `TextField` variant="outlined" |
-| Modály | `Dialog` + `DialogTitle/Content/Actions` |
-| Spodní list (mobil) | `Drawer` anchor="bottom" nebo `SwipeableDrawer` |
-| Toggle | `Switch` |
-| Stav fakturace | `Chip` size="small" |
-| Toast | `Snackbar` |
-| FAB | `Fab color="primary"` |
-| Spodní navigace (mobil) | `BottomNavigation` |
+## Layout a sekce
+Obsah je vystředěný, `max-width: 1120px`, vodorovný padding 24px. Stránka je plně fluidní: všechny mřížky používají `repeat(auto-fit, minmax(min(100%, X), 1fr))` a samy se zalamují až do jednoho sloupce.
 
-## Screens / Views
+### 1. Hlavička (`<header>`)
+- Spodní okraj `1px solid rgba(0,0,0,.08)`, padding 16/24.
+- Vlevo logo: čtverec 32×32, radius 4, `#1976d2`, bílé „V“ 17px/500. Vedle „Vykazovátko“ 18px/500. Gap 12.
+- Vpravo odkaz **PŘIHLÁSIT SE** → `https://vykazovatko.web.app`, outlined: border `1px solid rgba(25,118,210,.5)`, radius 4, padding 8/16, 14px/500, letter-spacing .4px, `#1976d2`. Hover: pozadí `rgba(25,118,210,.04)`, border `#1976d2`.
 
-### 0. Přihlášení / registrace (`route: "login"`)
-- **Účel:** přihlášení e-mailem a heslem, registrace, Google přihlášení, reset hesla.
-- **Layout:** vystředěná karta max-width 420px na podkladu `#f5f5f5`, nad kartou logo (čtverec 36px, radius 4, `#1976d2`, bílé „V“) + název „Výkazy práce“ (20px/500).
-- **Komponenty:** dvě záložky PŘIHLÁŠENÍ / REGISTRACE (aktivní `#1976d2` + spodní podtržení 2px), pole E-mail a Heslo (v režimu registrace navíc Heslo znovu), textový odkaz „Zapomenuté heslo?“ vpravo, primární tlačítko PŘIHLÁSIT SE / VYTVOŘIT ÚČET (plná šířka), oddělovač „NEBO“, tlačítko POKRAČOVAT S GOOGLE (outlined, kruhové barevné logo 18px), pod kartou text „Pokračováním souhlasíte s podmínkami použití.“
-- **Chyby:** nad formulářem alert `background #fdeded`, text `#5f2120`, radius 4, 14px.
+### 2. Hero
+- Pozadí `#f5f5f5`, spodní okraj `rgba(0,0,0,.08)`. Padding 72/24/64.
+- Dva sloupce `minmax(min(100%, 420px), 1fr)`, gap 48, svisle na střed. Pod ~940 px pod sebou.
+- **Levý sloupec:**
+  - Štítek „Zdarma, bez reklam a bez omezení“: `#e8f5e9` / text `#1b5e20`, radius 16, padding 5/12, 13px/500, margin-bottom 20.
+  - `<h1>` „Evidence zákazníků a výkazů práce na jednom místě“: `font-size: clamp(34px, 4.6vw, 48px)`, line-height 1.12, 500, letter-spacing −.5px, `text-wrap: balance`.
+  - Perex (18px, line-height 1.6, `rgba(0,0,0,.7)`, max-width 520, `text-wrap: pretty`): „Zapisujte, kdy jste pro koho začali a skončili pracovat. Vykazovátko spočítá odpracovaný čas, pohlídá, co už je vyfakturované, a výkaz za měsíc nebo rok vám připraví v Excelu.“
+  - Řádek (flex-wrap, gap 12): tlačítko **ZAČÍT** → `https://vykazovatko.web.app` (contained `#1976d2`, bílý text, radius 4, padding 13/28, 15px/500, letter-spacing .4px, stín MUI elevation 2, hover `#1565c0`) a vedle text „Registrace e-mailem nebo účtem Google“ (14px, `rgba(0,0,0,.6)`).
+- **Pravý sloupec — okno se screenshotem:**
+  - Rámeček: `#fff`, radius 8, border `1px solid rgba(0,0,0,.08)`, stín `0 11px 15px -7px rgba(0,0,0,.12), 0 24px 38px 3px rgba(0,0,0,.08)`, `overflow: hidden`.
+  - Lišta okna výšky 28px, `#eceff1`, vlevo tři kolečka 9px `rgba(0,0,0,.18)`, gap 6, padding 0/12.
+  - Obrázek v poměru **16:10**, `object-fit: cover`, `object-position` vlevo nahoře.
 
-### 1. Přehled (`route: "overview"`)
-- **Účel:** rychlý pohled na běžící činnosti a poslední odpracovanou práci; spuštění nové činnosti.
-- **Layout:** dvě karty pod sebou, gap 24, max-width 1280.
-- **Karta „Běžící činnosti“:** hlavička (16px/500) + počet; tabulka se sloupci Činnost, Zákazník, Začátek, Běží (oranžově `#ed6c02`, monospace), akce. Řádky podbarvené `#fff8e1`, na konci outlined tlačítko UKONČIT (`#d32f2f`). Prázdný stav: „Žádná činnost právě neběží. Novou spustíte tlačítkem +.“
-- **Karta „Odpracovaná práce“:** sloupce Činnost, Zákazník, Začátek, Konec, Vykázáno, Vyfakturováno (Chip Ano/Ne), akce (tlačítko VYFAKTUROVAT u nevyfakturovaných). Řazeno sestupně podle začátku, 10 záznamů na stránku (prop `rowsPerPageOverview`), stránkování „1–10 z N“ + šipky.
-- **Kliknutí na řádek:** otevře detail zákazníka dané položky a nad ním editační modál činnosti.
-- **FAB +** vpravo dole (56px, `#1976d2`): nová činnost se startem = teď.
-- **Overflow:** obě tabulky jsou v `overflow-x:auto` kontejneru s `min-width` (820 / 1080), takže se scrollují uvnitř karty.
+### 3. K čemu slouží
+- Padding 72/24. `<h2>` „K čemu slouží“ 28px/500. Podtitul 16px `rgba(0,0,0,.6)`, max-width 620, line-height 1.6, margin-bottom 40: „Pro živnostníky, konzultanty a všechny, kdo účtují podle odpracovaných hodin.“
+- Mřížka `minmax(min(100%, 180px), 1fr)`, gap 32 svisle / 40 vodorovně (4 sloupce od ~840 px obsahu).
+- Každá položka: číslo (Roboto Mono 13px/500, `#1976d2`, mb 10), `<h3>` 17px/500 (mb 8), text 15px, line-height 1.6, `rgba(0,0,0,.7)`.
 
-### 2. Zákazníci (`route: "customers"`)
-- **Layout:** jedna karta, max-width 1280.
-- **Nad tabulkou:** fulltextové pole (hledá napříč všemi atributy) a počet nalezených.
-- **Tabulka:** sloupce Název, IČ, Adresa, Kontaktní osoba, Vykázáno (součet ukončených činností, HH:MM). Druhý řádek hlavičky obsahuje filtr pro každý sloupec (input 12px).
-- **Stránkování:** 50 na stránku (prop `rowsPerPageCustomers`), „1–50 z N“ + šipky. V reálné aplikaci: Firestore `limit` + kurzorové stránkování.
-- **FAB +:** modál nový zákazník.
-- **Klik na řádek:** detail zákazníka (samostatná obrazovka, ne modál).
+| Číslo | Nadpis | Text |
+| --- | --- | --- |
+| 01 | Zákazníci | Adresář zákazníků s IČ, DIČ, kontakty a poznámkou. Vyhledávání napříč všemi údaji. |
+| 02 | Start a stop | Činnost spustíte jedním klikem a ukončíte, až skončíte. Může jich běžet i víc najednou. |
+| 03 | Přehled fakturace | U každé činnosti vidíte, jestli je vyfakturovaná a s jakým DUZP. Součty za měsíc i celkem. |
+| 04 | Výkaz do Excelu | Pracovní výkaz za měsíc nebo za celý rok stáhnete jako hotový soubor .xlsx pro zákazníka. |
 
-### 3. Detail zákazníka (`route: "detail"`)
-Tři pásy pod sebou na plnou šířku (max-width 1400), gap 16:
-1. **Karta údajů** — hlavička s názvem zákazníka, vpravo outlined tlačítko **„⤓ VÝKAZ DO EXCELU“** (zelené `#2e7d32`, výška 36, otevírá dialog exportu), ikony ✏️ (editace v modálu) a 🗑 (smazání). Atributy IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail v gridu `repeat(auto-fit, minmax(150px,1fr))`, gap 14/24; label 12px `rgba(0,0,0,.6)`, hodnota 14px. **NOVÉ:** pod gridem oddělený řádek (border-top `rgba(0,0,0,.08)`, padding 12/24/16) s popiskem „Poznámka“ a víceřádkovým textem na plnou šířku (14px, line-height 1.55, `white-space: pre-line`); když je prázdná, zobrazí se „Bez poznámky“ v `rgba(0,0,0,.45)`.
-2. **Karta „Přehled“** — čtyři hodnoty v řadě (`repeat(auto-fit, minmax(170px,1fr))`): Celkem vykázáno, Celkem vyfakturováno (zeleně `#2e7d32`), Vykázáno tento měsíc, Vyfakturováno tento měsíc. Hodnoty 20px/500 monospace.
-3. **Karta činností** — hlavička s počtem a tlačítkem „+ ČINNOST“ vpravo. Tabulka: Činnost, Začátek, Konec, Vykázáno, Vyfakturováno (Chip), DUZP, Poznámka, akce. Filtry v druhém řádku hlavičky: text na Činnost, „dd.mm.“ na Začátek, select Vše/Vyfakturováno/Nevyfakturováno, text na Poznámku. Neukončené řádky podbarvené `#fff8e1` s tlačítkem UKONČIT; nevyfakturované ukončené mají tlačítko VYFAKTUROVAT. Stránkování po 10.
-- **Smazání zákazníka:** dialog vyžaduje opsání přesného názvu zákazníka; maže i všechny jeho činnosti (v produkci Firebase Function / batch).
+### 4. Vaše data patří jen vám
+- Pozadí `#f5f5f5`, horní i spodní okraj `rgba(0,0,0,.08)`, padding 72/24. `<h2>` 28px/500, mb 40.
+- Mřížka `minmax(min(100%, 240px), 1fr)`, gap 24 (3 sloupce od ~770 px obsahu).
+- Karta: `#fff`, radius 4, padding 28/24, stín MUI elevation 1 (`0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)`). Nahoře kruh 40px (barvy v tabulce) se znakem 18px/700, mb 18. `<h3>` 18px/500 (mb 10), text 15px, line-height 1.65, `rgba(0,0,0,.7)`.
 
-### 4. Uživatelský profil (`route: "profile"`)
-- Vstup: tlačítko s avatarem v patě levého menu (položka v navigaci není).
-- Karta s avatarem, jménem, e-mailem, třemi statistikami (Zákazníků, Činností, Celkem vykázáno) a tlačítkem ODHLÁSIT SE.
-- Druhá karta „Smazání účtu“ (nadpis `#d32f2f`, vysvětlení, tlačítko SMAZAT ÚČET) → dialog s opsáním fráze `SMAZAT ÚČET`.
+| Znak | Kruh / znak | Nadpis | Text |
+| --- | --- | --- | --- |
+| 0 | `#e8f5e9` / `#1b5e20` | Celá aplikace je zdarma | Žádné tarify, zkušební doba ani placené funkce. Neexistuje ani žádná placená verze. Všechno, co aplikace umí, máte k dispozici hned po registraci. |
+| ◉ | `#e3f2fd` / `#1565c0` | Nikdo jiný data nevyužívá | Záznamy vidíte jen vy. Nikomu je neposkytujeme, neprodáváme a nepoužíváme k reklamě ani k analýzám. |
+| × | `#fdeded` / `#c62828` | Smazání účtu smaže vše | Účet můžete kdykoli zrušit v profilu. Spolu s ním se automaticky a nenávratně smažou všichni zákazníci i všechny výkazy. |
 
-### 5. Podmínky použití (`route: "terms"`)
-Karta max-width 820, padding 40/48, nadpis 28px, datum účinnosti, 8 očíslovaných sekcí (provozovatel, registrace a účet, vaše data, vkládaný obsah, dostupnost a odpovědnost, ukončení a smazání účtu, změny podmínek, rozhodné právo). Text je **návrh k právní revizi** — doplnit IČ a kontakt provozovatele. Odkaz je ve footeru každé stránky i pod přihlašovací kartou.
+Znaky v kruzích jsou zástupné. Nahraďte je inline SVG ikonami Material Icons (např. `Savings`/`MoneyOff`, `Lock`/`VisibilityOff`, `DeleteForever`), velikost 20–22px, `aria-hidden="true"`.
 
-### Modály
-| Modál | Obsah |
-| --- | --- |
-| Nová / editace činnosti | Název činnosti; Zákazník (autocomplete s fulltextem, dropdown max 220px, u nové z přehledu prázdný, z detailu předvyplněný); Začátek a Konec (`datetime-local`, `minmax(0,1fr)`); read-only Vykázaná doba HH:MM (u běžící „běží“) s poznámkou „zahrnuje změnu času“, pokud se liší timezone offset začátku a konce; Switch Vyfakturováno; DUZP (zobrazí se po zapnutí switche, předvyplní dnešek); Poznámka (textarea). Akce: SMAZAT (jen při editaci, vlevo), ZRUŠIT, ULOŽIT / SPUSTIT. Šířka 520. |
-| Nový / editace zákazníka | Grid 2 sloupce: Název (přes 2), IČ, DIČ, Adresa (přes 2), Kontaktní osoba (přes 2), Telefon, E-mail, **Poznámka (NOVÉ, textarea 3 řádky, přes 2 sloupce, nepovinná)**. Šířka 560. |
-| **Stáhnout pracovní výkaz (NOVÉ)** | Titulek „Stáhnout pracovní výkaz“, podtitul název zákazníka. Segmentový přepínač ZA MĚSÍC / ZA ROK (MUI `ToggleButtonGroup`, fullWidth). Pod ním select Měsíc (Leden–Prosinec) + select Rok v režimu měsíc, v režimu rok jen Rok. Výchozí: předchozí měsíc aktuálního roku. Souhrnný box (`rgba(0,0,0,.03)`) se třemi hodnotami: Činností, Vykázáno, Vyfakturováno (zeleně). Řádek s ikonou Excelu (`#1d6f42`) a názvem souboru v monospace. Pokud v období nejsou ukončené činnosti, oranžové upozornění `#ed6c02`: „V tomto období nejsou žádné ukončené činnosti. Soubor bude obsahovat jen hlavičku.“ Akce: NÁHLED (odkaz, vlevo, v prototypu otevírá návrh souboru — v aplikaci vynechat), ZRUŠIT, **STÁHNOUT .XLSX** (contained, `#2e7d32`, hover `#1b5e20`). Po stažení zavřít dialog a Snackbar „Staženo: <název souboru>“. Šířka 480. |
-| Vyfakturovat | Podtitul „činnost · zákazník · doba“, DUZP (předvyplněno dnešek), Poznámka. Potvrzení nastaví `invoiced=true`. Šířka 480. |
-| Smazání (zákazník / účet) | Titulek, počty dotčených záznamů, pole pro opsání přesné fráze, tlačítko aktivní až při shodě. Šířka 480. |
+### 5. Závěrečná výzva
+- Vystředěný blok, max-width 720, padding 80/24, text na střed.
+- `<h2>` „Vyzkoušejte to na první zakázce“ 28px/500, mb 12, `text-wrap: balance`.
+- Text 16px, line-height 1.6, `rgba(0,0,0,.65)`, mb 28: „Účet založíte za minutu. Když vám aplikace nesedne, smažete ho i se všemi daty.“
+- Tlačítko **OTEVŘÍT APLIKACI** → `https://vykazovatko.web.app`, stejný styl jako ZAČÍT.
 
-## Export do Excelu (NOVÉ) — `Export Excel.dc.html`
-Soubor ukazuje přesný obsah a formátování generovaného .xlsx. Přepínač nahoře přepíná měsíční a roční výkaz, záložky dole přepínají listy, klik na buňku ukáže v řádku vzorců zamýšlený vzorec.
+### 6. Patička (`<footer>`)
+- Horní okraj `1px solid rgba(0,0,0,.12)`, padding 20/24, 13px, `rgba(0,0,0,.6)`, flex-wrap, gap 8/20.
+- „© 2026 Vykazovátko“ · odkaz „Podmínky použití“ → `https://vykazovatko.web.app/podminky` · odkaz „Ochrana osobních údajů“ → `https://vykazovatko.web.app/ochrana-osobnich-udaju` · vpravo (`margin-left: auto`) odkaz „vykazovatko.web.app“ → `https://vykazovatko.web.app`.
+- Obě cesty existují v `src/routes/router.tsx` (`TERMS_PATH`, `PRIVACY_PATH`) a jsou veřejné, bez přihlášení.
 
-**Generování:** v prohlížeči knihovnou **ExcelJS** (podporuje styly, vzorce, freeze panes, autofilter, hyperlinky, nastavení tisku). Data: ukončené činnosti (`end != null`) aktuálního uživatele pro daného zákazníka, jejichž `start` spadá do období `[od, do)` v zóně Europe/Prague. Firestore dotaz: `where customerId == id`, `where start >= od`, `where start < do`, `orderBy start asc` (+ složený index `customerId + start`). Běžící činnosti se neexportují.
-
-**Název souboru:** `Vykaz_<Zakaznik>_<RRRR-MM>.xlsx` (měsíc) / `Vykaz_<Zakaznik>_<RRRR>.xlsx` (rok). `<Zakaznik>` = název bez diakritiky, nealfanumerické znaky nahradit `_`, bez `_` na krajích.
-
-**Měsíční výkaz — 1 list „Výkaz MM-RRRR“:**
-- Ř. 1: „PRACOVNÍ VÝKAZ“ (18pt, tučně, `#1D6F42`).
-- Ř. 3–8: popisek (šedě) v A, hodnota v B: Zákazník (tučně), IČ / DIČ, Adresa, Období („Srpen 2026“, tučně), Vypracoval (jméno + e-mail uživatele), Vystaveno (dnešní datum).
-- Ř. 10: hlavička tabulky — Datum | Činnost | Začátek | Konec | Doba [h:mm] | Vyfakturováno | DUZP | Poznámka. Bílé tučné písmo na `#1D6F42`. Freeze panes pod tímto řádkem, autofilter na rozsah tabulky.
-- Datové řádky: Datum `dd.mm.yyyy`; Začátek/Konec `hh:mm` (uložené jako plný datum/čas, aby činnost přes půlnoc a přes změnu času počítala správně); Doba = vzorec `=D-C` s formátem `[h]:mm` — **pozor:** hodnotu doby počítat z UTC instantů a zapsat jako číslo (`ms / 86 400 000`), vzorec je jen pro zobrazení v řádku vzorců; pokud by vzorec dával jiný výsledek (přechod letní/zimní čas), zapsat hodnotu. Vyfakturováno „Ano“ (text `#1B5E20`) / „Ne“ (text `#9C5700`, pozadí `#FFF2CC`); DUZP `dd.mm.yyyy` nebo prázdné; Poznámka šedě.
-- Řádek „Celkem“: pozadí `#E2EFDA`, tučně, horní okraj 2px `#1D6F42`; ve sloupci B „N činností“, v E `=SUBTOTAL(9;E11:E<poslední>)` (respektuje filtr).
-- Pod ním „z toho vyfakturováno“ `=SUMIFS(E..;F..;"Ano")` (zeleně) a „z toho nevyfakturováno“ = rozdíl (`#9C5700`).
-- O řádek níž: „Podpis zákazníka: ______________________“.
-
-**Roční výkaz — list „Souhrn RRRR“ + list pro každý měsíc s daty:**
-- Hlavička souboru stejná jako u měsíčního, Období „Rok 2026“.
-- Tabulka: Měsíc | Počet činností | Vykázáno [h:mm] | Vyfakturováno [h:mm] | Nevyfakturováno [h:mm] | Poslední DUZP. Vždy všech 12 měsíců; měsíce bez dat šedě s 0 / 0:00.
-- Název měsíce je interní hyperlink na list měsíce (`#'08 Srpen'!A1`, modře podtržený). Počet a Vykázáno jsou vzorce odkazující na list měsíce (`COUNTA` nad sloupcem Činnost, odkaz na buňku Celkem), aby se úpravy v listu promítly do souhrnu. Nevyfakturováno `=C-D`, nenulové zvýraznit `#FFF2CC`.
-- Řádek „Celkem RRRR“ se `SUM` přes měsíce, styl jako Celkem výše.
-- Listy měsíců: název „MM Měsíc“ (např. „08 Srpen“), obsah shodný s měsíčním výkazem; měsíce bez činností se jako list nevytváří.
-
-**Společné formátování:** Calibri 11; doby jako číslo s formátem `[h]:mm` (součet může přesáhnout 24 h); data `dd.mm.yyyy`, časy `hh:mm`, bez sekund; šířky sloupců přibližně A 12, B 30, C/D 9, E 12, F 14, G 12, H 30 znaků; tisk A4 na šířku, fit to width, opakovat řádek hlavičky tabulky.
-
-## Mobilní verze (`Vykazovani Mobil.dc.html`)
-> Pozn.: mobilní prototyp zatím neobsahuje poznámku zákazníka ani export. Na mobilu použijte stejná data: poznámku jako další řádek v kartě atributů, export jako položku v horní liště detailu otevírající bottom sheet se stejným obsahem jako desktopový dialog.
-
-Stejné funkce, jiné vzory. Rám iPhone 402×874 je pouze prezentační obal prototypu.
-- Spodní `BottomNavigation` (Přehled, Zákazníci, Profil), horní AppBar s titulkem; v detailu zákazníka šipka zpět a ikony ✏️ 🗑 vpravo.
-- Tabulky nahrazeny seznamy karet: běžící činnost (podbarvená, doba + UKONČIT), odpracovaná práce (název, zákazník, čas → čas, doba, Chip stavu, tlačítko VYFAKTUROVAT).
-- Zákazníci: pole hledání nad seznamem, řádky s adresou a součtem, šipka vpravo.
-- Detail: statistiky v gridu 2×2, pod tím atributy (label 110px vlevo), pod tím seznam činností po 8.
-- Všechny modály jako bottom sheety (radius 16 nahoře, max-height 88 %, animace slide-up 0,2 s).
-- Dotykové cíle min. 44 px; pole Začátek/Konec pod sebou.
-
-## Interactions & Behavior
-- **Navigace:** stavová (`route`), v produkci React Router: `/prehled`, `/zakaznici`, `/zakaznici/:id`, `/profil`, `/podminky`, `/prihlaseni`.
-- **Spuštění činnosti:** FAB na přehledu → modál (start = teď, konec prázdný). Paralelní běh více činností je povolen.
-- **Ukončení:** tlačítko UKONČIT nastaví konec na teď; doba se dopočítá.
-- **Výpočet doby:** `end - start` v ms, zaokrouhleno na minuty, formát `HH:MM` (bez sekund, hodiny mohou přesáhnout 24). Rozdíl počítat z absolutních časů (UTC instantů), ne z lokálních komponent — den přechodu na letní/zimní čas má 23, resp. 25 hodin, a činnost přes tuto hranici musí vyjít správně. Ukládat do Firestore jako `Timestamp`, zobrazovat v `Europe/Prague`.
-- **Fakturace:** tlačítko VYFAKTUROVAT (přehled i detail) → modál s DUZP a poznámkou → `invoiced=true`, `invoiceDate`, `note`. Stejná pole jdou nastavit i v editaci činnosti.
-- **Hledání a filtry:** fulltext přes všechny atributy zákazníka, filtry nad sloupci se kombinují (AND), změna filtru resetuje stránku na první.
-- **Stránkování:** přehled 10, zákazníci 50, činnosti v detailu 10, mobil 8/20/8.
-- **Mazání:** potvrzovací dialog s opisem přesné fráze; smazání zákazníka maže i jeho činnosti, smazání účtu maže vše.
-- **Zpětná vazba:** Snackbar vlevo dole, 2,6 s („Činnost ukončena“, „Zákazník uložen“, „Označeno jako vyfakturováno“, …).
-- **Hover:** řádky tabulky `rgba(0,0,0,.04)`, primární tlačítka `#1565c0`, ikonová tlačítka kruhové podbarvení `rgba(0,0,0,.06)`.
-- **Animace:** overlay fade 0,15 s, dialog pop (opacity + translateY 8px + scale .98) 0,18 s, sheet slide-up 0,2 s.
-- **Prázdné stavy:** „Žádná činnost právě neběží…“, „Nic nenalezeno“ v dropdownu zákazníků.
-- **Validace:** činnost vyžaduje název a zákazníka; zákazník vyžaduje název; mazací tlačítko aktivní jen při přesné shodě fráze; konec nesmí předcházet začátku (doplnit).
-
-## State Management
-Prototyp drží vše v jedné komponentě. V produkci:
-- `auth`: aktuální uživatel (Firebase Auth), stav načítání, chyba přihlášení.
-- `customers`: seznam pro aktuálního uživatele, stránkovaně (`where ownerUid == uid`, `orderBy name`, `limit`, kurzory).
-- `activities`: běžící (`where end == null`) a poslední ukončené (`orderBy start desc`, `limit`), v detailu filtrované `where customerId == id`.
-- UI stav: `route`, `selectedCustomerId`, `modal` (`activity` | `customer` | `invoice` | `delete` | `export` | null), stav exportu `{ period: 'month' | 'year', month: 0–11, year }`, `editingId`, obsah formulářů, filtry, čísla stránek, snackbar.
-- Datový model Firestore (návrh): `users/{uid}/customers/{customerId}` = `{ name, ico, dic, address, person, phone, email, note, createdAt }` — **`note: string` je NOVÉ**, u existujících dokumentů chybí → číst jako `note ?? ""`, migrace není nutná; `users/{uid}/activities/{activityId}` = `{ customerId, name, start: Timestamp, end: Timestamp|null, invoiced: boolean, invoiceDate: Timestamp|null, note: string }`.
-- Indexy: `activities` podle `end`, `start desc`, `customerId + start desc`.
-- Security rules: čtení i zápis pouze pro `request.auth.uid == uid` vlastníka dokumentu.
-- Smazání účtu a kaskádové smazání zákazníka řešit Firebase Function (batch po 500 dokumentech).
+## Interakce
+- Stránka nemá žádné skripty. Všechny odkazy do aplikace jsou obyčejné `<a href>` ve stejném okně.
+- Hover: odkazy `#1565c0` + podtržení, contained tlačítka `#1565c0` bez podtržení, outlined tlačítko viz hlavička. Přidat `:focus-visible` obrys `2px solid #1976d2`, offset 2px.
+- Respektovat `prefers-reduced-motion` (stránka stejně nemá animace).
 
 ## Design Tokens
-Výchozí MUI light téma.
-
-**Barvy**
-- primary `#1976d2`, primary dark `#1565c0`, primary light `#42a5f5`
-- error `#d32f2f`, error dark `#c62828`, error background `#fdeded`, error text `#5f2120`
-- success text `#1b5e20`, success background `#e8f5e9`, success value `#2e7d32`
-- warning / běžící `#ed6c02`, podbarvení běžícího řádku `#fff8e1` (hover `#ffecb3`)
-- background default `#f5f5f5`, paper `#fff`, snackbar `#323232`
-- text primary `rgba(0,0,0,.87)`, secondary `rgba(0,0,0,.6)`, disabled `rgba(0,0,0,.26)`
-- divider `rgba(0,0,0,.12)`, jemný divider `rgba(0,0,0,.08)`, okraj inputu `rgba(0,0,0,.23)`, hover řádku `rgba(0,0,0,.04)`, aktivní položka menu `rgba(25,118,210,.12)`
-
-**Typografie:** Roboto 400/500/700; čísla, časy a doby v Roboto Mono.
-- h1 stránky (podmínky) 28px/400; titulek AppBar 20px/500 (mobil 19px); nadpis karty 16px/500; titulek dialogu 20px/500
-- tělo 14–15px/400; hlavička tabulky 13px/500 `rgba(0,0,0,.6)`; popisek pole 12px; tlačítko 13–15px/500, letter-spacing .4px, UPPERCASE
-- statistika 20–24px/500 monospace
-
-**Rozestupy:** 4 / 8 / 12 / 16 / 24 / 32 / 48. Buňka tabulky padding 14px (dense 8px) svisle, 16px vodorovně (24px krajní sloupce). Karta padding 16–24px.
-
-**Radius:** 4 (karty, tlačítka, pole), 8 (mobilní karty), 12–16 (chip, sheet), 50 % (avatar, FAB, ikonová tlačítka).
-
-**Stíny:** elevation 1 `0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)`; AppBar elevation 4; FAB `0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12)`; dialog `0 11px 15px -7px rgba(0,0,0,.2), 0 24px 38px 3px rgba(0,0,0,.14), 0 9px 46px 8px rgba(0,0,0,.12)`.
-
-**Rozměry:** levé menu 256px, AppBar 64px, FAB 56px, dotykový cíl mobil min. 44px, obsah max-width 1280 (detail 1400, profil 640, podmínky 820).
+- **Barvy:** primary `#1976d2`, primary dark `#1565c0`; text `rgba(0,0,0,.87)`, sekundární `rgba(0,0,0,.6)`–`.7`; pozadí `#fff` / `#f5f5f5`; oddělovače `rgba(0,0,0,.08)` a `.12`; success `#e8f5e9` / `#1b5e20`; info `#e3f2fd` / `#1565c0`; error `#fdeded` / `#c62828`; lišta okna `#eceff1`.
+- **Písmo:** Roboto (400/500/700), čísla Roboto Mono 500. H1 clamp 34–48px, H2 28px, H3 17–18px, perex 18px, tělo 15–16px, drobné 13–14px. Tlačítka UPPERCASE, 500, letter-spacing .4px.
+- **Rozestupy:** 8 / 12 / 16 / 20 / 24 / 28 / 32 / 40 / 48 / 64 / 72 / 80.
+- **Radius:** 4 (tlačítka, karty, logo), 8 (okno se screenshotem), 16 (štítek), 50 % (kruhy ikon).
 
 ## Assets
-Žádné bitmapy ani ikonové fonty. Ikony v prototypu jsou textové znaky (`▤`, `☰`, `◍`, `⌕`, `‹`, `›`, `✏️`, `🗑`) — v implementaci nahradit `@mui/icons-material` (`DashboardOutlined`, `PeopleOutline`, `PersonOutline`, `Search`, `ChevronLeft/Right`, `Edit`, `Delete`, `Add`, `Stop`, `ReceiptLong`). Logo je čtverec s písmenem „V“, ne obrázek. Google tlačítko používá barevný kruh jako placeholder — nahradit oficiálním Google logem podle jejich brand guidelines.
+- `assets/screenshot-prehled.webp` — screenshot Přehledu vložený uživatelem (1020×440). **Pozor:** má jiný poměr než rámeček 16:10 a nízké rozlišení, v rámečku se ořízne. Požádejte uživatele o nový screenshot Přehledu ve velikosti aspoň 1600×1000 (16:10, ideálně 2× pro retina), nebo ho pořiďte z běžící aplikace s ukázkovými daty (bez skutečných zákazníků).
+- Logo „V“ je CSS čtverec s písmenem, ne obrázek. Favicon a apple-touch-icon zkopírujte z `public/` aplikace.
+- `og-image.png` 1200×630 zatím neexistuje. Vytvořte ho z loga, názvu a hlavního nadpisu na pozadí `#f5f5f5`.
 
 ## Files
-- `Vykazovani.dc.html` — desktopový prototyp, všechny obrazovky a modály
-- `Vykazovani Mobil.dc.html` — mobilní prototyp
-- `Export Excel.dc.html` — **NOVÉ**, návrh obsahu a formátování exportovaného .xlsx (měsíční a roční výkaz)
-- `ios-frame.jsx` — rám telefonu pro mobilní prototyp (jen prezentace, neimplementovat)
-- `support.js` — runtime prototypu (neimplementovat)
+- `Landing Page.dc.html` — návrh landing page (reference)
+- `assets/screenshot-prehled.webp` — screenshot pro hero
+- `support.js`, `image-slot.js`, `.image-slots.state.json` — runtime náhledu, **neimplementovat**

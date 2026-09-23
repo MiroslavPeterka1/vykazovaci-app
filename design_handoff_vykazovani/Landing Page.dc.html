@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Vykazovátko – bezplatná evidence zákazníků a výkazů práce</title>
+<meta name="description" content="Vykazovátko je bezplatná webová aplikace pro evidenci zákazníků a vykazování odpracovaného času. Vaše data vidíte jen vy a smazáním účtu zmizí všechna.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin:0; padding:0; background:#fff; }
+  body { font-family: Roboto, Helvetica, Arial, sans-serif; color: rgba(0,0,0,0.87); -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color:#1976d2; text-decoration:none; }
+  a:hover { color:#1565c0; text-decoration:underline; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column">
+
+  <header style="border-bottom:1px solid rgba(0,0,0,.08)">
+    <div style="max-width:1120px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; gap:12px">
+      <div style="width:32px; height:32px; border-radius:4px; background:#1976d2; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:500; font-size:17px">V</div>
+      <div style="font-size:18px; font-weight:500">Vykazovátko</div>
+      <a href="https://vykazovatko.web.app" style="margin-left:auto; padding:8px 16px; border:1px solid rgba(25,118,210,.5); border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; color:#1976d2; text-decoration:none" style-hover="background:rgba(25,118,210,.04); border-color:#1976d2">PŘIHLÁSIT SE</a>
+    </div>
+  </header>
+
+  <main style="flex:1">
+    <section style="background:#f5f5f5; border-bottom:1px solid rgba(0,0,0,.08)">
+      <div style="max-width:1120px; margin:0 auto; padding:72px 24px 64px; display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap:48px; align-items:center">
+        <div>
+          <div style="display:inline-flex; align-items:center; gap:8px; background:#e8f5e9; color:#1b5e20; border-radius:16px; padding:5px 12px; font-size:13px; font-weight:500; margin-bottom:20px">Zdarma, bez reklam a bez omezení</div>
+          <h1 style="font-size:clamp(34px, 4.6vw, 48px); line-height:1.12; font-weight:500; margin:0 0 20px; letter-spacing:-.5px; text-wrap:balance">Evidence zákazníků a výkazů práce na jednom místě</h1>
+          <p style="font-size:18px; line-height:1.6; color:rgba(0,0,0,.7); margin:0 0 32px; max-width:520px; text-wrap:pretty">Zapisujte, kdy jste pro koho začali a skončili pracovat. Vykazovátko spočítá odpracovaný čas, pohlídá, co už je vyfakturované, a výkaz za měsíc nebo rok vám připraví v Excelu.</p>
+          <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center">
+            <a href="https://vykazovatko.web.app" style="padding:13px 28px; background:#1976d2; color:#fff; border-radius:4px; font-size:15px; font-weight:500; letter-spacing:.4px; text-decoration:none; box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)" style-hover="background:#1565c0; color:#fff; text-decoration:none">ZAČÍT</a>
+            <span style="font-size:14px; color:rgba(0,0,0,.6)">Registrace e-mailem nebo účtem Google</span>
+          </div>
+        </div>
+        <div style="background:#fff; border-radius:8px; box-shadow:0 11px 15px -7px rgba(0,0,0,.12),0 24px 38px 3px rgba(0,0,0,.08); overflow:hidden; border:1px solid rgba(0,0,0,.08)">
+          <div style="height:28px; background:#eceff1; display:flex; align-items:center; gap:6px; padding:0 12px">
+            <span style="width:9px; height:9px; border-radius:50%; background:rgba(0,0,0,.18)"></span>
+            <span style="width:9px; height:9px; border-radius:50%; background:rgba(0,0,0,.18)"></span>
+            <span style="width:9px; height:9px; border-radius:50%; background:rgba(0,0,0,.18)"></span>
+          </div>
+          <div style="aspect-ratio:16 / 10; position:relative">
+            <image-slot id="hero-screenshot" shape="rect" fit="cover" placeholder="Snímek obrazovky aplikace – Přehled"></image-slot>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div style="max-width:1120px; margin:0 auto; padding:72px 24px">
+        <h2 style="font-size:28px; font-weight:500; margin:0 0 8px">K čemu slouží</h2>
+        <p style="font-size:16px; color:rgba(0,0,0,.6); margin:0 0 40px; max-width:620px; line-height:1.6">Pro živnostníky, konzultanty a všechny, kdo účtují podle odpracovaných hodin.</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap:32px 40px">
+          <sc-for list="{{ features }}" as="f" hint-placeholder-count="4">
+            <div>
+              <div style="font-family:'Roboto Mono', monospace; font-size:13px; font-weight:500; color:#1976d2; margin-bottom:10px">{{ f.n }}</div>
+              <h3 style="font-size:17px; font-weight:500; margin:0 0 8px">{{ f.t }}</h3>
+              <p style="font-size:15px; line-height:1.6; color:rgba(0,0,0,.7); margin:0; text-wrap:pretty">{{ f.d }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:#f5f5f5; border-top:1px solid rgba(0,0,0,.08); border-bottom:1px solid rgba(0,0,0,.08)">
+      <div style="max-width:1120px; margin:0 auto; padding:72px 24px">
+        <h2 style="font-size:28px; font-weight:500; margin:0 0 40px">Vaše data patří jen vám</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap:24px">
+          <sc-for list="{{ promises }}" as="p" hint-placeholder-count="3">
+            <div style="background:#fff; border-radius:4px; padding:28px 24px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12)">
+              <div style="width:40px; height:40px; border-radius:50%; background:{{ p.bg }}; color:{{ p.fg }}; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; margin-bottom:18px">{{ p.icon }}</div>
+              <h3 style="font-size:18px; font-weight:500; margin:0 0 10px">{{ p.t }}</h3>
+              <p style="font-size:15px; line-height:1.65; color:rgba(0,0,0,.7); margin:0; text-wrap:pretty">{{ p.d }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div style="max-width:720px; margin:0 auto; padding:80px 24px; text-align:center">
+        <h2 style="font-size:28px; font-weight:500; margin:0 0 12px; text-wrap:balance">Vyzkoušejte to na první zakázce</h2>
+        <p style="font-size:16px; line-height:1.6; color:rgba(0,0,0,.65); margin:0 0 28px">Účet založíte za minutu. Když vám aplikace nesedne, smažete ho i se všemi daty.</p>
+        <a href="https://vykazovatko.web.app" style="display:inline-block; padding:13px 28px; background:#1976d2; color:#fff; border-radius:4px; font-size:15px; font-weight:500; letter-spacing:.4px; text-decoration:none; box-shadow:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12)" style-hover="background:#1565c0; color:#fff; text-decoration:none">OTEVŘÍT APLIKACI</a>
+      </div>
+    </section>
+  </main>
+
+  <footer style="border-top:1px solid rgba(0,0,0,.12)">
+    <div style="max-width:1120px; margin:0 auto; padding:20px 24px; display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center; font-size:13px; color:rgba(0,0,0,.6)">
+      <span>© 2026 Vykazovátko</span>
+      <a href="https://vykazovatko.web.app/podminky">Podmínky použití</a>
+      <a href="https://vykazovatko.web.app/ochrana-osobnich-udaju">Ochrana osobních údajů</a>
+      <a href="https://vykazovatko.web.app" style="margin-left:auto">vykazovatko.web.app</a>
+    </div>
+  </footer>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      features: [
+        { n: "01", t: "Zákazníci", d: "Adresář zákazníků s IČ, DIČ, kontakty a poznámkou. Vyhledávání napříč všemi údaji." },
+        { n: "02", t: "Start a stop", d: "Činnost spustíte jedním klikem a ukončíte, až skončíte. Může jich běžet i víc najednou." },
+        { n: "03", t: "Přehled fakturace", d: "U každé činnosti vidíte, jestli je vyfakturovaná a s jakým DUZP. Součty za měsíc i celkem." },
+        { n: "04", t: "Výkaz do Excelu", d: "Pracovní výkaz za měsíc nebo za celý rok stáhnete jako hotový soubor .xlsx pro zákazníka." },
+      ],
+      promises: [
+        { icon: "0", bg: "#e8f5e9", fg: "#1b5e20", t: "Celá aplikace je zdarma", d: "Žádné tarify, zkušební doba ani placené funkce. Neexistuje ani žádná placená verze. Všechno, co aplikace umí, máte k dispozici hned po registraci." },
+        { icon: "◉", bg: "#e3f2fd", fg: "#1565c0", t: "Nikdo jiný data nevyužívá", d: "Záznamy vidíte jen vy. Nikomu je neposkytujeme, neprodáváme a nepoužíváme k reklamě ani k analýzám." },
+        { icon: "×", bg: "#fdeded", fg: "#c62828", t: "Smazání účtu smaže vše", d: "Účet můžete kdykoli zrušit v profilu. Spolu s ním se automaticky a nenávratně smažou všichni zákazníci i všechny výkazy." },
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>
