@@ -15,6 +15,7 @@ export const customerFormSchema = z.object({
   person: z.string().trim(),
   phone: z.string().trim(),
   email: z.union([z.literal(''), z.string().trim().email('Neplatný e-mail')]),
+  note: z.string(),
 });
 
 export type CustomerFormValues = z.infer<typeof customerFormSchema>;
@@ -27,6 +28,7 @@ export const emptyCustomerForm: CustomerFormValues = {
   person: '',
   phone: '',
   email: '',
+  note: '',
 };
 
 export const activityFormSchema = z

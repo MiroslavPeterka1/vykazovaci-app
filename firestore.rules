@@ -35,7 +35,8 @@ service cloud.firestore {
         && incoming().get('address', '') is string
         && incoming().get('person', '') is string
         && incoming().get('phone', '') is string
-        && incoming().get('email', '') is string;
+        && incoming().get('email', '') is string
+        && incoming().get('note', '') is string;
     }
 
     function validActivity() {

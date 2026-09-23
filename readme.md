@@ -98,7 +98,7 @@ Jedna karta, max. šířka 1280 px.
 
 Nad obsahem tlačítko **‹ ZPĚT NA ZÁKAZNÍKY**. Obsah tvoří tři karty pod sebou na plnou šířku (max. 1400 px):
 
-**1) Karta údajů** — v hlavičce název zákazníka, vpravo ikony **✏️** (editace v modálu) a **🗑** (smazání). Pod hlavičkou atributy v gridu: IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail.
+**1) Karta údajů** — v hlavičce název zákazníka, vpravo zelené tlačítko **⤓ VÝKAZ DO EXCELU** (otevře dialog exportu; na mobilu jen ikona) a ikony **✏️** (editace v modálu) a **🗑** (smazání). Pod hlavičkou atributy v gridu: IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail. Pod nimi oddělený řádek s **poznámkou** na plnou šířku; zachovává zalomení řádků a u prázdné hodnoty ukáže „Bez poznámky“.
 
 **2) Karta „Přehled“** — čtyři hodnoty vedle sebe:
 
@@ -138,6 +138,7 @@ Samostatná stránka (karta max. 820 px) s nadpisem, datem účinnosti a očísl
 | **Nová / editace činnosti** | Název činnosti; Zákazník (našeptávač s fulltextem, u nové činnosti z Přehledu prázdný, z detailu předvyplněný); Začátek a Konec (`datetime-local`); read-only **Vykázaná doba** ve formátu HH:MM (u běžící činnosti text „běží“); přepínač **Vyfakturováno**; **DUZP** (zobrazí se po zapnutí přepínače, předvyplněné dnešním datem); **Poznámka**. Akce: **SMAZAT** (pouze při editaci, vlevo), ZRUŠIT, **ULOŽIT** / **SPUSTIT**. |
 | **Nový / editace zákazníka** | Grid o dvou sloupcích: Název (přes celou šířku), IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail. Akce: ZRUŠIT, ULOŽIT. |
 | **Vyfakturovat** | Podtitul „činnost · zákazník · doba“, **DUZP** (předvyplněno dnešní datum) a **Poznámka** (předvyplněná poznámkou činnosti). Potvrzení nastaví `invoiced = true`, uloží DUZP i poznámku. |
+| **Stáhnout pracovní výkaz** | Podtitul s názvem zákazníka. Přepínač **Za měsíc / Za rok**, pod ním výběr měsíce a roku (v ročním režimu jen rok). Souhrn zvoleného období: Činností, Vykázáno, Vyfakturováno (zeleně). Řádek s názvem souboru. Když v období nejsou ukončené činnosti, oranžové upozornění, že soubor bude obsahovat jen hlavičku. Akce: ZRUŠIT, **STÁHNOUT .XLSX**. Po stažení se dialog zavře a objeví se potvrzení „Staženo: <název souboru>“. |
 | **Smazání (zákazník / účet)** | Titulek, počty dotčených záznamů, pole pro opsání přesné fráze a nápověda s přesným textem. Tlačítko **SMAZAT NENÁVRATNĚ** je aktivní až při přesné shodě. |
 
 ## 6. Datové entity
@@ -151,6 +152,7 @@ Samostatná stránka (karta max. 820 px) s nadpisem, datem účinnosti a očísl
 - Kontaktní osoba
 - Telefon
 - E-mail
+- Poznámka (volný víceřádkový text, nepovinná)
 
 ### Činnost
 
@@ -212,11 +214,49 @@ Stejné funkce, jiné vzory (viz mobilní prototyp):
 - Dotykové cíle min. 44 px, pole Začátek/Konec pod sebou
 - Odkaz na podmínky použití je v profilu
 
+## 8a. Export pracovního výkazu do Excelu
+
+Export se spouští z detailu zákazníka tlačítkem **⤓ VÝKAZ DO EXCELU** a generuje soubor .xlsx
+přímo v prohlížeči, bez serveru.
+
+**Co se exportuje:** ukončené činnosti daného zákazníka, jejichž začátek spadá do zvoleného
+období (v zóně Europe/Prague), seřazené vzestupně. Běžící činnosti do výkazu nepatří — dokud
+nemají konec, jejich doba se ještě mění.
+
+**Název souboru:** `Vykaz_<Zakaznik>_<RRRR-MM>.xlsx` za měsíc, `Vykaz_<Zakaznik>_<RRRR>.xlsx`
+za rok. Název zákazníka se zbaví diakritiky a nealfanumerické znaky nahradí podtržítkem.
+
+**Měsíční výkaz** má jeden list. Hlavička souboru (řádky 1–9) nese zákazníka, jeho IČ/DIČ
+a adresu, období, jméno a e-mail uživatele a datum vystavení. Na řádku 10 začíná tabulka:
+
+| Datum | Činnost | Začátek | Konec | Doba [h:mm] | Vyfakturováno | DUZP | Poznámka |
+
+Hlavička je ukotvená a má zapnutý automatický filtr. Pod daty je řádek **Celkem** se součtem
+přes `SUBTOTAL`, takže respektuje filtr, a pod ním rozpad na vyfakturovanou a nevyfakturovanou
+část. Na konci řádek pro podpis zákazníka.
+
+**Roční výkaz** má list **Souhrn RRRR** a za ním jeden list pro každý měsíc s daty. Souhrn
+vypisuje všech dvanáct měsíců (i prázdné), název měsíce odkazuje na jeho list a počet činností
+i vykázaný čas se berou vzorcem z listu měsíce — úprava v listu se tak promítne do souhrnu.
+Nevyfakturovaný čas je zvýrazněný.
+
+**Formátování:** Calibri 11, hlavička tabulky bílá na zelené, řádek součtu podbarvený. Doby
+jsou čísla s formátem `[h]:mm`, takže se dají sčítat a součet smí přesáhnout 24 hodin. Data
+`dd.mm.rrrr`, časy `hh:mm`, tisk A4 na šířku s opakovanou hlavičkou.
+
+**Dvě věci, na kterých to stojí:**
+
+- **Doba se počítá z absolutních okamžiků, ne z rozdílu časů v buňkách.** Vzorec `Konec − Začátek`
+  pracuje s nástěnným časem, takže u činnosti přes změnu letního času dá o hodinu jinou hodnotu.
+  V takovém řádku proto vzorec není a je tam rovnou správná hodnota.
+- **Vzorce se do souboru ukládají s čárkou jako oddělovačem argumentů**, i když je Excel českému
+  uživateli zobrazí se středníkem. Formát xlsx jiný oddělovač nepřijme.
+
 ## 9. Datový model (návrh)
 
 ```
 users/{uid}/customers/{customerId}
-  { name, ico, dic, address, person, phone, email, createdAt, updatedAt }
+  { name, ico, dic, address, person, phone, email, note, createdAt, updatedAt }
 
 users/{uid}/activities/{activityId}
   { customerId, name,
@@ -287,9 +327,10 @@ Rozhodnout před implementací:
 - **DUZP při fakturaci** — má být povinné, když je zapnuté Vyfakturováno?
 - **Ověření e-mailu po registraci** — vyžadovat, nebo ne? A jak se chovat při kolizi, kdy stejný e-mail přijde přes Google i přes heslo?
 
-Vědomě **mimo rozsah v1** (není v návrhu):
+Vědomě **mimo rozsah** (není v návrhu):
 
-- Export podkladů pro fakturaci (CSV/XLSX) za zákazníka a období
+- Souhrnný výkaz napříč všemi zákazníky za období — export je vždy za jednoho zákazníka
+
 - Předvyplnění zákazníka z ARES podle IČ a validace IČ/DIČ
 - Archivace zákazníka místo mazání
 - Sazby, fakturovatelnost v penězích, generování faktur

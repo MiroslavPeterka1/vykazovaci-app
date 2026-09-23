@@ -129,6 +129,24 @@ describe('validace zákazníka', () => {
     await assertFails(setDoc(doc(alice(), 'users', ALICE, 'customers', 'x'), { name: '' }));
     await assertFails(setDoc(doc(alice(), 'users', ALICE, 'customers', 'x'), { ico: '123' }));
   });
+
+  it('poznámka projde jako text, ne jako číslo', async () => {
+    await assertSucceeds(
+      setDoc(doc(alice(), 'users', ALICE, 'customers', 'x'), {
+        name: 'Alfatech',
+        note: 'Fakturovat vždy k 15. dni.',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(alice(), 'users', ALICE, 'customers', 'y'), { name: 'Alfatech', note: 42 }),
+    );
+  });
+
+  it('zákazník bez poznámky projde — starší dokumenty pole nemají', async () => {
+    await assertSucceeds(
+      setDoc(doc(alice(), 'users', ALICE, 'customers', 'z'), { name: 'Bez poznámky' }),
+    );
+  });
 });
 
 describe('validace činnosti', () => {

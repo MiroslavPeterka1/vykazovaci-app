@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#eceff1; }
+  body { font-family: Roboto, Helvetica, Arial, sans-serif; color: rgba(0,0,0,.87); -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color:#1976d2; } a:hover { color:#1565c0; }
+</style>
+</helmet>
+
+<div style="padding:40px; display:flex; flex-direction:column; gap:20px; width:1320px">
+  <div style="display:flex; align-items:flex-end; gap:24px">
+    <div>
+      <div style="font-size:24px; font-weight:500">Export pracovního výkazu do Excelu</div>
+      <div style="font-size:14px; color:rgba(0,0,0,.6); margin-top:4px">Návrh obsahu a formátování souboru .xlsx. Zákazník Horizont IT, vzorová data.</div>
+    </div>
+    <div style="margin-left:auto; display:flex; border:1px solid rgba(25,118,210,.5); border-radius:4px; overflow:hidden; background:#fff">
+      <button onClick="{{ showMonthly }}" style="{{ modeMonthStyle }}">MĚSÍČNÍ VÝKAZ</button>
+      <button onClick="{{ showYearly }}" style="{{ modeYearStyle }}">ROČNÍ VÝKAZ</button>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; align-items:start">
+    <div style="background:#fff; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,.12); overflow:hidden; border:1px solid #c8c8c8">
+      <div style="height:36px; background:#1d6f42; color:#fff; display:flex; align-items:center; padding:0 14px; gap:10px; font-size:13px">
+        <span style="width:18px; height:18px; border-radius:2px; background:#fff; color:#1d6f42; font-weight:700; font-size:11px; display:flex; align-items:center; justify-content:center">X</span>
+        <span style="font-family:'Roboto Mono', monospace; font-size:12px">{{ fileName }}</span>
+      </div>
+      <div style="height:30px; border-bottom:1px solid #d4d4d4; display:flex; align-items:center; font-family:Carlito, Calibri, sans-serif; font-size:13px">
+        <span style="width:60px; text-align:center; color:#666; border-right:1px solid #d4d4d4; line-height:30px">{{ cellRef }}</span>
+        <span style="padding:0 10px; color:#999; font-style:italic">fx</span>
+        <span style="color:#333; font-family:'Roboto Mono', monospace; font-size:12px">{{ formula }}</span>
+      </div>
+
+      <div style="font-family:Carlito, Calibri, 'Segoe UI', sans-serif; font-size:13px; color:#222">
+        <div style="display:grid; grid-template-columns:{{ cols }}; background:#f3f3f3; border-bottom:1px solid #d4d4d4; color:#666; font-size:12px">
+          <sc-for list="{{ colLetters }}" as="l" hint-placeholder-count="9">
+            <div style="padding:3px 0; text-align:center; border-right:1px solid #e0e0e0">{{ l }}</div>
+          </sc-for>
+        </div>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="24">
+          <div style="display:grid; grid-template-columns:{{ cols }}; border-bottom:1px solid #e6e6e6; min-height:22px">
+            <div style="background:#f3f3f3; color:#666; font-size:12px; text-align:center; border-right:1px solid #d4d4d4; padding:3px 0">{{ r.n }}</div>
+            <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="8">
+              <div onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.v }}</div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; align-items:stretch; border-top:1px solid #c8c8c8; background:#f3f3f3; font-family:Carlito, Calibri, sans-serif; font-size:13px; overflow-x:auto">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:16px">
+      <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); padding:18px 20px">
+        <div style="font-size:15px; font-weight:500; margin-bottom:10px">{{ specTitle }}</div>
+        <sc-for list="{{ specs }}" as="s" hint-placeholder-count="5">
+          <div style="padding:8px 0; border-top:1px solid rgba(0,0,0,.08)">
+            <div style="font-size:12px; color:rgba(0,0,0,.6)">{{ s.k }}</div>
+            <div style="font-size:13px; line-height:1.5; text-wrap:pretty">{{ s.v }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff; border-radius:4px; box-shadow:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12); padding:18px 20px">
+        <div style="font-size:15px; font-weight:500; margin-bottom:10px">Společné formátování</div>
+        <sc-for list="{{ common }}" as="s" hint-placeholder-count="6">
+          <div style="padding:8px 0; border-top:1px solid rgba(0,0,0,.08); font-size:13px; line-height:1.5; text-wrap:pretty">{{ s }}</div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const MONTHS = ["Leden","Únor","Březen","Duben","Květen","Červen","Červenec","Srpen","Září","Říjen","Listopad","Prosinec"];
+const ACT = ["Vývoj API","Konzultace","Code review","Oprava chyby","Nasazení na produkci","Analýza požadavků","Testování","Dokumentace","Workshop"];
+const NOTES = ["", "", "", "Faktura 2026/0143", "Součást paušálu", "Odsouhlaseno e-mailem"];
+const pad = (n) => (n < 10 ? "0" + n : "" + n);
+const LETTERS = "ABCDEFGHIJ".split("");
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    let s = 7;
+    const rnd = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+    const acts = [];
+    for (let m = 0; m < 9; m++) {
+      const n = 6 + Math.floor(rnd() * 8);
+      for (let i = 0; i < n; i++) {
+        const d = 1 + Math.floor(rnd() * 27);
+        const start = new Date(2026, m, d, 8 + Math.floor(rnd() * 8), Math.floor(rnd() * 4) * 15);
+        const mins = 30 + Math.floor(rnd() * 16) * 15;
+        const inv = m < 8 && rnd() < 0.9;
+        acts.push({ start, end: new Date(start.getTime() + mins * 60000), name: ACT[Math.floor(rnd() * ACT.length)], invoiced: inv, duzp: inv ? new Date(2026, m + 1, 5) : null, note: NOTES[Math.floor(rnd() * NOTES.length)] });
+      }
+    }
+    acts.sort((a, b) => a.start - b.start);
+    this.state = { mode: "month", tab: 0, acts, sel: null };
+  }
+  dur(ms) { const m = Math.round(ms / 60000); return Math.floor(m / 60) + ":" + pad(m % 60); }
+  d(x) { return x ? pad(x.getDate()) + "." + pad(x.getMonth() + 1) + "." + x.getFullYear() : ""; }
+  t(x) { return pad(x.getHours()) + ":" + pad(x.getMinutes()); }
+
+  renderVals() {
+    const st = this.state, isM = st.mode === "month";
+    const base = "padding:3px 6px; border-right:1px solid #e6e6e6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:cell;";
+    const cell = (v, extra, f) => ({ v, f: f || v, extra: extra || "" });
+    const header = "background:#1d6f42; color:#fff; font-weight:700;";
+    const total = "background:#e2efda; font-weight:700; border-top:2px solid #1d6f42;";
+    const num = "text-align:right; font-variant-numeric:tabular-nums;";
+    const rows = [];
+    const push = (cells) => rows.push(cells);
+    const metaRows = (period) => {
+      push([cell("PRACOVNÍ VÝKAZ", "font-size:18px; font-weight:700; color:#1d6f42; overflow:visible;")]);
+      push([]);
+      push([cell("Zákazník", "color:#666;"), cell("Horizont IT s.r.o.", "font-weight:700; overflow:visible;")]);
+      push([cell("IČ / DIČ", "color:#666;"), cell("27183945 / CZ27183945", "overflow:visible;")]);
+      push([cell("Adresa", "color:#666;"), cell("Vinohradská 42, Praha 2", "overflow:visible;")]);
+      push([cell("Období", "color:#666;"), cell(period, "font-weight:700; overflow:visible;")]);
+      push([cell("Vypracoval", "color:#666;"), cell("Miroslav Peterka, miroslav.peterka@example.cz", "overflow:visible;")]);
+      push([cell("Vystaveno", "color:#666;"), cell("23.09.2026", "overflow:visible;")]);
+      push([]);
+    };
+    let cols, tabs = [], fileName, specTitle, specs;
+
+    if (isM || st.tab > 0) {
+      const m = isM ? 7 : st.tab - 1;
+      const list = st.acts.filter((a) => a.start.getMonth() === m);
+      metaRows(MONTHS[m] + " 2026");
+      const h = rows.length + 1;
+      push(["Datum","Činnost","Začátek","Konec","Doba [h:mm]","Vyfakturováno","DUZP","Poznámka"].map((x, i) => cell(x, header + (i === 4 ? num : ""))));
+      list.forEach((a) => push([
+        cell(this.d(a.start)), cell(a.name), cell(this.t(a.start), "text-align:center;"), cell(this.t(a.end), "text-align:center;"),
+        cell(this.dur(a.end - a.start), num, "=D" + (rows.length + 1) + "-C" + (rows.length + 1)),
+        cell(a.invoiced ? "Ano" : "Ne", "text-align:center;" + (a.invoiced ? "color:#1b5e20;" : "color:#9c5700; background:#fff2cc;")),
+        cell(this.d(a.duzp), "text-align:center;"), cell(a.note, "color:#555;"),
+      ]));
+      const last = rows.length;
+      const sum = list.reduce((x, a) => x + (a.end - a.start), 0);
+      const inv = list.filter((a) => a.invoiced).reduce((x, a) => x + (a.end - a.start), 0);
+      push([cell("Celkem", total), cell(list.length + " činností", total), cell("", total), cell("", total), cell(this.dur(sum), total + num, "=SUBTOTAL(9;E" + (h + 1) + ":E" + last + ")"), cell("", total), cell("", total), cell("", total)]);
+      push([cell(""), cell("z toho vyfakturováno", "color:#666;"), cell(""), cell(""), cell(this.dur(inv), num + "color:#1b5e20;", "=SUMIFS(E" + (h + 1) + ":E" + last + ";F" + (h + 1) + ":F" + last + ";\"Ano\")")]);
+      push([cell(""), cell("z toho nevyfakturováno", "color:#666;"), cell(""), cell(""), cell(this.dur(sum - inv), num + "color:#9c5700;", "=E" + (last + 1) + "-E" + (last + 2))]);
+      push([]); push([cell(""), cell("Podpis zákazníka: ______________________", "color:#666; overflow:visible;")]);
+      cols = "40px 88px minmax(140px,1.6fr) 64px 64px 92px 104px 88px minmax(120px,1.4fr)";
+      fileName = isM ? "Vykaz_Horizont_IT_2026-08.xlsx" : "Vykaz_Horizont_IT_2026.xlsx";
+      specTitle = isM ? "Měsíční výkaz — 1 list" : "List měsíce v ročním výkazu";
+      specs = [
+        { k: "List", v: isM ? "Jeden list „Výkaz 08-2026“." : "Stejná struktura jako měsíční výkaz; listy mají názvy „01 Leden“ … „12 Prosinec“, prázdné měsíce se vynechají." },
+        { k: "Hlavička", v: "Zákazník (název, IČ/DIČ, adresa), období, jméno a e-mail uživatele, datum vystavení." },
+        { k: "Tabulka", v: "Řazeno podle začátku vzestupně. Doba je vzorec Konec − Začátek; činnost přes půlnoc nese datum konce v buňce jako plný datum/čas." },
+        { k: "Součty", v: "Celkem přes SUBTOTAL, takže respektuje autofiltr. Pod tím vyfakturováno a nevyfakturováno." },
+        { k: "Obsah", v: "Pouze ukončené činnosti, jejichž začátek spadá do období. Běžící činnosti se neexportují." },
+      ];
+      if (!isM) tabs.push({ label: "Souhrn", i: 0 });
+    }
+    if (!isM) {
+      const months = [];
+      for (let m = 0; m < 12; m++) { const l = st.acts.filter((a) => a.start.getMonth() === m); if (l.length) months.push({ m, l }); }
+      tabs = [{ label: "Souhrn 2026", i: 0 }].concat(months.map((x) => ({ label: pad(x.m + 1) + " " + MONTHS[x.m], i: x.m + 1 })));
+      if (st.tab === 0) {
+        metaRows("Rok 2026");
+        const h = rows.length + 1;
+        push(["Měsíc","Počet činností","Vykázáno [h:mm]","Vyfakturováno [h:mm]","Nevyfakturováno [h:mm]","Poslední DUZP"].map((x, i) => cell(x, header + (i > 0 && i < 5 ? num : ""))));
+        let tc = 0, ts = 0, ti = 0;
+        MONTHS.forEach((name, m) => {
+          const l = st.acts.filter((a) => a.start.getMonth() === m);
+          const sum = l.reduce((x, a) => x + (a.end - a.start), 0), inv = l.filter((a) => a.invoiced).reduce((x, a) => x + (a.end - a.start), 0);
+          tc += l.length; ts += sum; ti += inv;
+          const duzp = l.filter((a) => a.duzp).map((a) => a.duzp).sort((a, b) => b - a)[0];
+          const r = rows.length + 1, sheet = "'" + pad(m + 1) + " " + name + "'";
+          push([
+            cell(name, l.length ? "color:#0563c1; text-decoration:underline;" : "color:#999;", l.length ? "=HYPERLINK(\"#" + sheet + "!A1\";\"" + name + "\")" : name),
+            cell(l.length ? "" + l.length : "0", num + (l.length ? "" : "color:#999;"), l.length ? "=COUNTA(" + sheet + "!B11:B" + (10 + l.length) + ")" : "0"),
+            cell(this.dur(sum), num + (l.length ? "" : "color:#999;"), l.length ? "=" + sheet + "!E" + (11 + l.length) : "0:00"),
+            cell(this.dur(inv), num + "color:" + (l.length ? "#1b5e20" : "#999") + ";"),
+            cell(this.dur(sum - inv), num + (sum - inv > 0 ? "color:#9c5700; background:#fff2cc;" : "color:#999;"), "=C" + r + "-D" + r),
+            cell(this.d(duzp), "text-align:center;"),
+          ]);
+        });
+        const last = rows.length;
+        push([cell("Celkem 2026", total), cell("" + tc, total + num, "=SUM(B" + (h + 1) + ":B" + last + ")"), cell(this.dur(ts), total + num, "=SUM(C" + (h + 1) + ":C" + last + ")"), cell(this.dur(ti), total + num, "=SUM(D" + (h + 1) + ":D" + last + ")"), cell(this.dur(ts - ti), total + num, "=SUM(E" + (h + 1) + ":E" + last + ")"), cell("", total)]);
+        cols = "40px minmax(120px,1.2fr) 110px 120px 150px 160px 110px minmax(40px,.5fr) minmax(40px,.5fr)";
+        fileName = "Vykaz_Horizont_IT_2026.xlsx";
+        specTitle = "Roční výkaz — souhrn + listy měsíců";
+        specs = [
+          { k: "Listy", v: "První list „Souhrn 2026“, za ním jeden list na každý měsíc s činnostmi ve formátu měsíčního výkazu." },
+          { k: "Souhrn", v: "Všech 12 měsíců, i prázdné (šedě, 0:00), aby byl rok kompletní. Název měsíce je odkaz na jeho list." },
+          { k: "Hodnoty", v: "Počet a vykázáno se odkazují vzorcem na součty v listech měsíců, takže úprava v listu se promítne do souhrnu." },
+          { k: "Zvýraznění", v: "Nevyfakturovaný čas se zvýrazní žlutě, na první pohled je vidět, co zbývá fakturovat." },
+        ];
+      }
+    }
+    const rowsOut = rows.map((cells, ri) => {
+      const full = cells.concat([]);
+      while (full.length < 8) full.push(cell(""));
+      return { n: ri + 1, cells: full.slice(0, 8).map((c, ci) => {
+        const on = st.sel && st.sel.r === ri && st.sel.c === ci;
+        return { v: c.v, style: base + c.extra + (on ? "outline:2px solid #1d6f42; outline-offset:-2px; position:relative; z-index:1;" : ""),
+          onClick: () => this.setState({ sel: { r: ri, c: ci, f: c.f } }) };
+      }) };
+    });
+    const seg = (on) => "padding:9px 16px; border:none; font-size:13px; font-weight:500; letter-spacing:.4px; cursor:pointer;" + (on ? "background:rgba(25,118,210,.12); color:#1565c0;" : "background:#fff; color:rgba(0,0,0,.6);");
+    const tabStyle = (on) => "padding:6px 16px; border:none; border-right:1px solid #d4d4d4; font-family:inherit; font-size:13px; cursor:pointer; white-space:nowrap;" + (on ? "background:#fff; color:#1d6f42; font-weight:700; box-shadow:inset 0 -2px 0 #1d6f42;" : "background:transparent; color:#444;");
+    if (isM) tabs = [{ label: "Výkaz 08-2026", i: 0 }];
+    return {
+      showMonthly: () => this.setState({ mode: "month", tab: 0, sel: null }),
+      showYearly: () => this.setState({ mode: "year", tab: 0, sel: null }),
+      modeMonthStyle: seg(isM), modeYearStyle: seg(!isM) + "border-left:1px solid rgba(25,118,210,.5);",
+      fileName, cols, colLetters: [""].concat(LETTERS.slice(0, 8)), rows: rowsOut,
+      cellRef: st.sel ? LETTERS[st.sel.c] + (st.sel.r + 1) : "A1",
+      formula: st.sel ? st.sel.f : "PRACOVNÍ VÝKAZ",
+      tabs: tabs.map((t) => ({ label: t.label, style: tabStyle(isM ? true : st.tab === t.i), onClick: () => this.setState({ tab: isM ? 0 : t.i, sel: null }) })),
+      specTitle, specs,
+      common: [
+        "Doby jsou uložené jako číselná hodnota času s formátem [h]:mm, takže se dají dál sčítat a součet může přesáhnout 24 hodin.",
+        "Datum dd.mm.rrrr, čas hh:mm, bez sekund. Časy v zóně Europe/Prague; doba se počítá z UTC, takže sedí i přes změnu letního/zimního času.",
+        "Hlavička tabulky je ukotvená (freeze panes) a má zapnutý automatický filtr.",
+        "Tisk: A4 na šířku, přizpůsobit na šířku stránky, opakovat řádek hlavičky tabulky.",
+        "Písmo Calibri 11, hlavička tabulky bílá na zelené #1D6F42, řádek součtu #E2EFDA.",
+        "Generuje se v prohlížeči (knihovna ExcelJS), bez serveru; data jsou jen z Firestore aktuálního uživatele.",
+      ],
+    };
+  }
+}
+
+</script>
+</body>
+</html>

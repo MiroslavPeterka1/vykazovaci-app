@@ -256,6 +256,7 @@
                 <div style="font-size:18px; font-weight:500; line-height:1.3">{{ detName }}</div>
                 <div style="font-size:13px; color:rgba(0,0,0,.6); margin-top:4px">Zákazník</div>
               </div>
+              <button onClick="{{ openExport }}" style="height:36px; padding:0 14px; margin-right:4px; border:1px solid rgba(46,125,50,.5); color:#2e7d32; background:#fff; border-radius:4px; cursor:pointer; font-size:13px; font-weight:500; letter-spacing:.4px; display:flex; align-items:center; gap:8px" style-hover="background:rgba(46,125,50,.06); border-color:#2e7d32"><span style="font-size:15px">⤓</span>VÝKAZ DO EXCELU</button>
               <button onClick="{{ openEditCustomer }}" title="Editovat" style="width:36px; height:36px; border:none; background:none; border-radius:50%; cursor:pointer; font-size:15px" style-hover="background:rgba(0,0,0,.06)">✏️</button>
               <button onClick="{{ openDeleteCustomer }}" title="Smazat" style="width:36px; height:36px; border:none; background:none; border-radius:50%; cursor:pointer; font-size:15px" style-hover="background:rgba(211,47,47,.08)">🗑</button>
             </div>
@@ -266,6 +267,10 @@
                   <div style="font-size:14px; overflow-wrap:anywhere">{{ attr.value }}</div>
                 </div>
               </sc-for>
+            </div>
+            <div style="padding:12px 24px 16px; border-top:1px solid rgba(0,0,0,.08)">
+              <div style="font-size:12px; color:rgba(0,0,0,.6); margin-bottom:2px">Poznámka</div>
+              <div style="font-size:14px; line-height:1.55; white-space:pre-line; text-wrap:pretty; color:{{ detNoteColor }}">{{ detNote }}</div>
             </div>
           </div>
 
@@ -508,6 +513,10 @@
         <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">E-mail</span>
         <input value="{{ cfEmail }}" onChange="{{ onCfEmail }}" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none" style-focus="border-color:#1976d2">
       </div>
+      <div style="position:relative; grid-column:span 2">
+        <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Poznámka</span>
+        <textarea value="{{ cfNote }}" onChange="{{ onCfNote }}" rows="3" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none; resize:vertical; font-family:inherit" style-focus="border-color:#1976d2"></textarea>
+      </div>
     </div>
     <div style="padding:16px; display:flex; justify-content:flex-end; gap:8px">
       <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
@@ -532,6 +541,54 @@
     <div style="padding:16px; display:flex; justify-content:flex-end; gap:8px">
       <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
       <button onClick="{{ confirmDelete }}" disabled="{{ deleteDisabled }}" style="{{ deleteBtnStyle }}">SMAZAT NENÁVRATNĚ</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ modalExport }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeModal }}" style="position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px; animation:dcfade .15s ease">
+  <div onClick="{{ stopProp }}" style="width:100%; max-width:480px; background:#fff; border-radius:4px; box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12); animation:dcpop .18s ease">
+    <div style="padding:20px 24px 4px; font-size:20px; font-weight:500">Stáhnout pracovní výkaz</div>
+    <div style="padding:0 24px 8px; font-size:14px; color:rgba(0,0,0,.6)">{{ detName }}</div>
+    <div style="padding:16px 24px 8px; display:flex; flex-direction:column; gap:22px">
+      <div style="display:flex; border:1px solid rgba(25,118,210,.5); border-radius:4px; overflow:hidden">
+        <button onClick="{{ exMonthly }}" style="{{ exMonthBtnStyle }}">ZA MĚSÍC</button>
+        <button onClick="{{ exYearly }}" style="{{ exYearBtnStyle }}">ZA ROK</button>
+      </div>
+      <div style="display:grid; grid-template-columns:{{ exGridCols }}; gap:16px">
+        <sc-if value="{{ exIsMonth }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative; min-width:0">
+            <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Měsíc</span>
+            <select value="{{ exMonth }}" onChange="{{ onExMonth }}" style="width:100%; padding:14px 10px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none; background:#fff">
+              <sc-for list="{{ monthOptions }}" as="m" hint-placeholder-count="12"><option value="{{ m.value }}">{{ m.label }}</option></sc-for>
+            </select>
+          </div>
+        </sc-if>
+        <div style="position:relative; min-width:0">
+          <span style="position:absolute; top:-8px; left:9px; background:#fff; padding:0 5px; font-size:12px; color:rgba(0,0,0,.6)">Rok</span>
+          <select value="{{ exYear }}" onChange="{{ onExYear }}" style="width:100%; padding:14px 10px; border:1px solid rgba(0,0,0,.23); border-radius:4px; font-size:15px; outline:none; background:#fff">
+            <option value="2026">2026</option><option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+      <div style="background:rgba(0,0,0,.03); border-radius:4px; padding:12px 16px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px">
+        <div><div style="font-size:12px; color:rgba(0,0,0,.6)">Činností</div><div style="font-size:18px; font-weight:500">{{ exCount }}</div></div>
+        <div><div style="font-size:12px; color:rgba(0,0,0,.6)">Vykázáno</div><div style="font-size:18px; font-weight:500; font-family:'Roboto Mono', monospace">{{ exTotal }}</div></div>
+        <div><div style="font-size:12px; color:rgba(0,0,0,.6)">Vyfakturováno</div><div style="font-size:18px; font-weight:500; font-family:'Roboto Mono', monospace; color:#2e7d32">{{ exInvoiced }}</div></div>
+      </div>
+      <div style="font-size:13px; color:rgba(0,0,0,.6); display:flex; gap:8px; align-items:center">
+        <span style="width:22px; height:22px; border-radius:3px; background:#1d6f42; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center">X</span>
+        <span style="font-family:'Roboto Mono', monospace; font-size:12px; overflow-wrap:anywhere">{{ exFileName }}</span>
+      </div>
+      <sc-if value="{{ exEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px; color:#ed6c02">V tomto období nejsou žádné ukončené činnosti. Soubor bude obsahovat jen hlavičku.</div>
+      </sc-if>
+    </div>
+    <div style="padding:16px; display:flex; justify-content:flex-end; gap:8px">
+      <a href="Export Excel.dc.html" target="_blank" style="margin-right:auto; padding:8px 12px; font-size:14px; font-weight:500; letter-spacing:.4px">NÁHLED</a>
+      <button onClick="{{ closeModal }}" style="padding:8px 16px; background:none; border:none; color:#1976d2; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer; border-radius:4px" style-hover="background:rgba(25,118,210,.06)">ZRUŠIT</button>
+      <button onClick="{{ doExport }}" style="padding:8px 22px; background:#2e7d32; color:#fff; border:none; border-radius:4px; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer" style-hover="background:#1b5e20">STÁHNOUT .XLSX</button>
     </div>
   </div>
 </div>
@@ -587,6 +644,7 @@ class Component extends DCLogic {
       person: FIRST[Math.floor(rnd() * 12)] + " " + LAST[Math.floor(rnd() * 12)],
       phone: "+420 " + (600 + Math.floor(rnd() * 170)) + " " + (100 + Math.floor(rnd() * 899)) + " " + (100 + Math.floor(rnd() * 899)),
       email: "info@" + name.toLowerCase().replace(/[^a-z]/g, "").slice(0, 10) + ".cz",
+      note: ["", "", "Fakturace vždy k 5. dni následujícího měsíce.", "Hodinová sazba 1 200 Kč bez DPH. Výjezdy účtovat zvlášť.", "Výkaz posílat kontaktní osobě e-mailem spolu s fakturou."][Math.floor(rnd() * 5)],
     }));
     const now = new Date(2026, 8, 20, 16, 42, 0);
     const activities = [];
@@ -618,6 +676,7 @@ class Component extends DCLogic {
       cf: {}, deleteKind: null, deleteConfirm: "",
       custSearch: "", fName: "", fIco: "", fAddr: "", fPerson: "", fAct: "", fActFrom: "", fInv: "", fNote: "",
       actInvoiced: false, actInvDate: "", actNote: "", invoiceId: null, invDate: "", invNote: "",
+      exPeriod: "month", exMonth: "8", exYear: "2026",
       pageOverview: 0, pageCust: 0, pageDet: 0, snackbar: "", tick: 0,
     };
   }
@@ -847,6 +906,34 @@ class Component extends DCLogic {
       onCfPerson: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { person: e.target.value }) })),
       onCfPhone: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { phone: e.target.value }) })),
       onCfEmail: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { email: e.target.value }) })),
+      cfNote: st.cf.note || "",
+      onCfNote: (e) => this.setState((s) => ({ cf: Object.assign({}, s.cf, { note: e.target.value }) })),
+      detNote: sel && sel.note ? sel.note : "Bez poznámky",
+      detNoteColor: sel && sel.note ? "rgba(0,0,0,.87)" : "rgba(0,0,0,.45)",
+      ...(() => {
+        const MONTHS = ["Leden","Únor","Březen","Duben","Květen","Červen","Červenec","Srpen","Září","Říjen","Listopad","Prosinec"];
+        const y = +st.exYear, m = +st.exMonth, isM = st.exPeriod === "month";
+        const from = isM ? new Date(y, m, 1) : new Date(y, 0, 1);
+        const to = isM ? new Date(y, m + 1, 1) : new Date(y + 1, 0, 1);
+        const acts = sel ? st.activities.filter((a) => a.cid === sel.id && a.end && a.start >= from && a.start < to) : [];
+        const slug = sel ? sel.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_|_$/g, "") : "";
+        const seg = (on) => "flex:1; padding:9px 12px; border:none; font-size:14px; font-weight:500; letter-spacing:.4px; cursor:pointer;" + (on ? "background:rgba(25,118,210,.12); color:#1565c0;" : "background:#fff; color:rgba(0,0,0,.6);");
+        return {
+          modalExport: st.modal === "export",
+          openExport: () => this.setState({ modal: "export", exPeriod: st.exPeriod || "month", exMonth: st.exMonth || "8", exYear: st.exYear || "2026" }),
+          exIsMonth: isM, exGridCols: isM ? "minmax(0,1fr) minmax(0,1fr)" : "minmax(0,1fr)",
+          exMonthly: () => this.setState({ exPeriod: "month" }), exYearly: () => this.setState({ exPeriod: "year" }),
+          exMonthBtnStyle: seg(isM), exYearBtnStyle: seg(!isM) + "border-left:1px solid rgba(25,118,210,.5);",
+          monthOptions: MONTHS.map((l, i) => ({ value: "" + i, label: l })),
+          exMonth: st.exMonth, exYear: st.exYear,
+          onExMonth: (e) => this.setState({ exMonth: e.target.value }), onExYear: (e) => this.setState({ exYear: e.target.value }),
+          exCount: acts.length, exEmpty: acts.length === 0,
+          exTotal: this.fmtDur(acts.reduce((s2, a) => s2 + (a.end - a.start), 0)),
+          exInvoiced: this.fmtDur(acts.filter((a) => a.invoiced).reduce((s2, a) => s2 + (a.end - a.start), 0)),
+          exFileName: "Vykaz_" + slug + "_" + (isM ? y + "-" + pad(m + 1) : y) + ".xlsx",
+          doExport: () => { this.setState({ modal: null }); this.toast("Staženo: Vykaz_" + slug + "_" + (isM ? y + "-" + pad(m + 1) : y) + ".xlsx"); },
+        };
+      })(),
       openEditCustomer: () => this.setState({ modal: "customer", editingId: "cust", cf: Object.assign({}, sel) }),
       saveCustomer: () => {
         const cf = st.cf;
@@ -856,7 +943,7 @@ class Component extends DCLogic {
           this.toast("Zákazník uložen");
         } else {
           const id = "n" + Date.now();
-          const c = Object.assign({ id, ico: "", dic: "", address: "", person: "", phone: "", email: "" }, cf, { id });
+          const c = Object.assign({ id, ico: "", dic: "", address: "", person: "", phone: "", email: "", note: "" }, cf, { id });
           this.setState((s) => ({ customers: [c].concat(s.customers), modal: null, route: "detail", selectedId: id, pageDet: 0 }));
           this.toast("Zákazník vytvořen");
         }

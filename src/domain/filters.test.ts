@@ -23,6 +23,7 @@ function customer(overrides: Partial<Customer> = {}): Customer {
     person: 'Petra Svobodová',
     phone: '+420 601 222 333',
     email: 'info@cermakmedia.cz',
+    note: '',
     totalMinutes: 0,
     invoicedMinutes: 0,
     ...overrides,
@@ -91,6 +92,16 @@ describe('filterCustomers', () => {
 
   it('bez filtrů vrací vše', () => {
     expect(filterCustomers(customers, emptyCustomerFilters)).toHaveLength(2);
+  });
+
+  it('fulltext hledá i v poznámce', () => {
+    const withNote = [customer({ id: 'c9', name: 'Gama', note: 'Platí vždy po 14 dnech' })];
+    expect(
+      filterCustomers(withNote, { ...emptyCustomerFilters, fulltext: '14 dnech' }),
+    ).toHaveLength(1);
+    expect(filterCustomers(withNote, { ...emptyCustomerFilters, fulltext: 'zaloha' })).toHaveLength(
+      0,
+    );
   });
 });
 

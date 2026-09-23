@@ -1,5 +1,11 @@
 # Handoff: Výkazy práce (evidence zákazníků a vykazování práce)
 
+> **Změny v této verzi (2026-09-23)** — aplikace už existuje, implementujte jen tyto dvě úpravy:
+> 1. **Poznámka u zákazníka** — nové pole `note` (viz sekce 3 a modál zákazníka).
+> 2. **Export pracovního výkazu do Excelu** za měsíc a za rok (viz sekce „Export do Excelu“ a soubor `Export Excel.dc.html`).
+>
+> Zbytek dokumentu popisuje celý návrh jako referenci. Vše ostatní už je implementováno — neměňte to, pokud se to s novými úpravami nekříží.
+
 ## Overview
 Webová aplikace pro evidenci zákazníků a vykazování odvedené práce. Každý uživatel vidí a spravuje pouze svoje záznamy. Uživatel zakládá zákazníky, spouští a ukončuje činnosti (možný paralelní běh), edituje je, označuje je jako vyfakturované s DUZP a poznámkou a sleduje součty. Administrace probíhá mimo aplikaci, přímo v konzoli Firebase.
 
@@ -56,7 +62,7 @@ Mapování na MUI komponenty:
 
 ### 3. Detail zákazníka (`route: "detail"`)
 Tři pásy pod sebou na plnou šířku (max-width 1400), gap 16:
-1. **Karta údajů** — hlavička s názvem zákazníka, vpravo ikony ✏️ (editace v modálu) a 🗑 (smazání). Atributy IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail v gridu `repeat(auto-fit, minmax(150px,1fr))`, gap 14/24; label 12px `rgba(0,0,0,.6)`, hodnota 14px.
+1. **Karta údajů** — hlavička s názvem zákazníka, vpravo outlined tlačítko **„⤓ VÝKAZ DO EXCELU“** (zelené `#2e7d32`, výška 36, otevírá dialog exportu), ikony ✏️ (editace v modálu) a 🗑 (smazání). Atributy IČ, DIČ, Adresa, Kontaktní osoba, Telefon, E-mail v gridu `repeat(auto-fit, minmax(150px,1fr))`, gap 14/24; label 12px `rgba(0,0,0,.6)`, hodnota 14px. **NOVÉ:** pod gridem oddělený řádek (border-top `rgba(0,0,0,.08)`, padding 12/24/16) s popiskem „Poznámka“ a víceřádkovým textem na plnou šířku (14px, line-height 1.55, `white-space: pre-line`); když je prázdná, zobrazí se „Bez poznámky“ v `rgba(0,0,0,.45)`.
 2. **Karta „Přehled“** — čtyři hodnoty v řadě (`repeat(auto-fit, minmax(170px,1fr))`): Celkem vykázáno, Celkem vyfakturováno (zeleně `#2e7d32`), Vykázáno tento měsíc, Vyfakturováno tento měsíc. Hodnoty 20px/500 monospace.
 3. **Karta činností** — hlavička s počtem a tlačítkem „+ ČINNOST“ vpravo. Tabulka: Činnost, Začátek, Konec, Vykázáno, Vyfakturováno (Chip), DUZP, Poznámka, akce. Filtry v druhém řádku hlavičky: text na Činnost, „dd.mm.“ na Začátek, select Vše/Vyfakturováno/Nevyfakturováno, text na Poznámku. Neukončené řádky podbarvené `#fff8e1` s tlačítkem UKONČIT; nevyfakturované ukončené mají tlačítko VYFAKTUROVAT. Stránkování po 10.
 - **Smazání zákazníka:** dialog vyžaduje opsání přesného názvu zákazníka; maže i všechny jeho činnosti (v produkci Firebase Function / batch).
@@ -73,11 +79,39 @@ Karta max-width 820, padding 40/48, nadpis 28px, datum účinnosti, 8 očíslova
 | Modál | Obsah |
 | --- | --- |
 | Nová / editace činnosti | Název činnosti; Zákazník (autocomplete s fulltextem, dropdown max 220px, u nové z přehledu prázdný, z detailu předvyplněný); Začátek a Konec (`datetime-local`, `minmax(0,1fr)`); read-only Vykázaná doba HH:MM (u běžící „běží“) s poznámkou „zahrnuje změnu času“, pokud se liší timezone offset začátku a konce; Switch Vyfakturováno; DUZP (zobrazí se po zapnutí switche, předvyplní dnešek); Poznámka (textarea). Akce: SMAZAT (jen při editaci, vlevo), ZRUŠIT, ULOŽIT / SPUSTIT. Šířka 520. |
-| Nový / editace zákazníka | Grid 2 sloupce: Název (přes 2), IČ, DIČ, Adresa (přes 2), Kontaktní osoba (přes 2), Telefon, E-mail. Šířka 560. |
+| Nový / editace zákazníka | Grid 2 sloupce: Název (přes 2), IČ, DIČ, Adresa (přes 2), Kontaktní osoba (přes 2), Telefon, E-mail, **Poznámka (NOVÉ, textarea 3 řádky, přes 2 sloupce, nepovinná)**. Šířka 560. |
+| **Stáhnout pracovní výkaz (NOVÉ)** | Titulek „Stáhnout pracovní výkaz“, podtitul název zákazníka. Segmentový přepínač ZA MĚSÍC / ZA ROK (MUI `ToggleButtonGroup`, fullWidth). Pod ním select Měsíc (Leden–Prosinec) + select Rok v režimu měsíc, v režimu rok jen Rok. Výchozí: předchozí měsíc aktuálního roku. Souhrnný box (`rgba(0,0,0,.03)`) se třemi hodnotami: Činností, Vykázáno, Vyfakturováno (zeleně). Řádek s ikonou Excelu (`#1d6f42`) a názvem souboru v monospace. Pokud v období nejsou ukončené činnosti, oranžové upozornění `#ed6c02`: „V tomto období nejsou žádné ukončené činnosti. Soubor bude obsahovat jen hlavičku.“ Akce: NÁHLED (odkaz, vlevo, v prototypu otevírá návrh souboru — v aplikaci vynechat), ZRUŠIT, **STÁHNOUT .XLSX** (contained, `#2e7d32`, hover `#1b5e20`). Po stažení zavřít dialog a Snackbar „Staženo: <název souboru>“. Šířka 480. |
 | Vyfakturovat | Podtitul „činnost · zákazník · doba“, DUZP (předvyplněno dnešek), Poznámka. Potvrzení nastaví `invoiced=true`. Šířka 480. |
 | Smazání (zákazník / účet) | Titulek, počty dotčených záznamů, pole pro opsání přesné fráze, tlačítko aktivní až při shodě. Šířka 480. |
 
+## Export do Excelu (NOVÉ) — `Export Excel.dc.html`
+Soubor ukazuje přesný obsah a formátování generovaného .xlsx. Přepínač nahoře přepíná měsíční a roční výkaz, záložky dole přepínají listy, klik na buňku ukáže v řádku vzorců zamýšlený vzorec.
+
+**Generování:** v prohlížeči knihovnou **ExcelJS** (podporuje styly, vzorce, freeze panes, autofilter, hyperlinky, nastavení tisku). Data: ukončené činnosti (`end != null`) aktuálního uživatele pro daného zákazníka, jejichž `start` spadá do období `[od, do)` v zóně Europe/Prague. Firestore dotaz: `where customerId == id`, `where start >= od`, `where start < do`, `orderBy start asc` (+ složený index `customerId + start`). Běžící činnosti se neexportují.
+
+**Název souboru:** `Vykaz_<Zakaznik>_<RRRR-MM>.xlsx` (měsíc) / `Vykaz_<Zakaznik>_<RRRR>.xlsx` (rok). `<Zakaznik>` = název bez diakritiky, nealfanumerické znaky nahradit `_`, bez `_` na krajích.
+
+**Měsíční výkaz — 1 list „Výkaz MM-RRRR“:**
+- Ř. 1: „PRACOVNÍ VÝKAZ“ (18pt, tučně, `#1D6F42`).
+- Ř. 3–8: popisek (šedě) v A, hodnota v B: Zákazník (tučně), IČ / DIČ, Adresa, Období („Srpen 2026“, tučně), Vypracoval (jméno + e-mail uživatele), Vystaveno (dnešní datum).
+- Ř. 10: hlavička tabulky — Datum | Činnost | Začátek | Konec | Doba [h:mm] | Vyfakturováno | DUZP | Poznámka. Bílé tučné písmo na `#1D6F42`. Freeze panes pod tímto řádkem, autofilter na rozsah tabulky.
+- Datové řádky: Datum `dd.mm.yyyy`; Začátek/Konec `hh:mm` (uložené jako plný datum/čas, aby činnost přes půlnoc a přes změnu času počítala správně); Doba = vzorec `=D-C` s formátem `[h]:mm` — **pozor:** hodnotu doby počítat z UTC instantů a zapsat jako číslo (`ms / 86 400 000`), vzorec je jen pro zobrazení v řádku vzorců; pokud by vzorec dával jiný výsledek (přechod letní/zimní čas), zapsat hodnotu. Vyfakturováno „Ano“ (text `#1B5E20`) / „Ne“ (text `#9C5700`, pozadí `#FFF2CC`); DUZP `dd.mm.yyyy` nebo prázdné; Poznámka šedě.
+- Řádek „Celkem“: pozadí `#E2EFDA`, tučně, horní okraj 2px `#1D6F42`; ve sloupci B „N činností“, v E `=SUBTOTAL(9;E11:E<poslední>)` (respektuje filtr).
+- Pod ním „z toho vyfakturováno“ `=SUMIFS(E..;F..;"Ano")` (zeleně) a „z toho nevyfakturováno“ = rozdíl (`#9C5700`).
+- O řádek níž: „Podpis zákazníka: ______________________“.
+
+**Roční výkaz — list „Souhrn RRRR“ + list pro každý měsíc s daty:**
+- Hlavička souboru stejná jako u měsíčního, Období „Rok 2026“.
+- Tabulka: Měsíc | Počet činností | Vykázáno [h:mm] | Vyfakturováno [h:mm] | Nevyfakturováno [h:mm] | Poslední DUZP. Vždy všech 12 měsíců; měsíce bez dat šedě s 0 / 0:00.
+- Název měsíce je interní hyperlink na list měsíce (`#'08 Srpen'!A1`, modře podtržený). Počet a Vykázáno jsou vzorce odkazující na list měsíce (`COUNTA` nad sloupcem Činnost, odkaz na buňku Celkem), aby se úpravy v listu promítly do souhrnu. Nevyfakturováno `=C-D`, nenulové zvýraznit `#FFF2CC`.
+- Řádek „Celkem RRRR“ se `SUM` přes měsíce, styl jako Celkem výše.
+- Listy měsíců: název „MM Měsíc“ (např. „08 Srpen“), obsah shodný s měsíčním výkazem; měsíce bez činností se jako list nevytváří.
+
+**Společné formátování:** Calibri 11; doby jako číslo s formátem `[h]:mm` (součet může přesáhnout 24 h); data `dd.mm.yyyy`, časy `hh:mm`, bez sekund; šířky sloupců přibližně A 12, B 30, C/D 9, E 12, F 14, G 12, H 30 znaků; tisk A4 na šířku, fit to width, opakovat řádek hlavičky tabulky.
+
 ## Mobilní verze (`Vykazovani Mobil.dc.html`)
+> Pozn.: mobilní prototyp zatím neobsahuje poznámku zákazníka ani export. Na mobilu použijte stejná data: poznámku jako další řádek v kartě atributů, export jako položku v horní liště detailu otevírající bottom sheet se stejným obsahem jako desktopový dialog.
+
 Stejné funkce, jiné vzory. Rám iPhone 402×874 je pouze prezentační obal prototypu.
 - Spodní `BottomNavigation` (Přehled, Zákazníci, Profil), horní AppBar s titulkem; v detailu zákazníka šipka zpět a ikony ✏️ 🗑 vpravo.
 - Tabulky nahrazeny seznamy karet: běžící činnost (podbarvená, doba + UKONČIT), odpracovaná práce (název, zákazník, čas → čas, doba, Chip stavu, tlačítko VYFAKTUROVAT).
@@ -106,8 +140,8 @@ Prototyp drží vše v jedné komponentě. V produkci:
 - `auth`: aktuální uživatel (Firebase Auth), stav načítání, chyba přihlášení.
 - `customers`: seznam pro aktuálního uživatele, stránkovaně (`where ownerUid == uid`, `orderBy name`, `limit`, kurzory).
 - `activities`: běžící (`where end == null`) a poslední ukončené (`orderBy start desc`, `limit`), v detailu filtrované `where customerId == id`.
-- UI stav: `route`, `selectedCustomerId`, `modal` (`activity` | `customer` | `invoice` | `delete` | null), `editingId`, obsah formulářů, filtry, čísla stránek, snackbar.
-- Datový model Firestore (návrh): `users/{uid}/customers/{customerId}` = `{ name, ico, dic, address, person, phone, email, createdAt }`; `users/{uid}/activities/{activityId}` = `{ customerId, name, start: Timestamp, end: Timestamp|null, invoiced: boolean, invoiceDate: Timestamp|null, note: string }`.
+- UI stav: `route`, `selectedCustomerId`, `modal` (`activity` | `customer` | `invoice` | `delete` | `export` | null), stav exportu `{ period: 'month' | 'year', month: 0–11, year }`, `editingId`, obsah formulářů, filtry, čísla stránek, snackbar.
+- Datový model Firestore (návrh): `users/{uid}/customers/{customerId}` = `{ name, ico, dic, address, person, phone, email, note, createdAt }` — **`note: string` je NOVÉ**, u existujících dokumentů chybí → číst jako `note ?? ""`, migrace není nutná; `users/{uid}/activities/{activityId}` = `{ customerId, name, start: Timestamp, end: Timestamp|null, invoiced: boolean, invoiceDate: Timestamp|null, note: string }`.
 - Indexy: `activities` podle `end`, `start desc`, `customerId + start desc`.
 - Security rules: čtení i zápis pouze pro `request.auth.uid == uid` vlastníka dokumentu.
 - Smazání účtu a kaskádové smazání zákazníka řešit Firebase Function (batch po 500 dokumentech).
@@ -143,5 +177,6 @@ Výchozí MUI light téma.
 ## Files
 - `Vykazovani.dc.html` — desktopový prototyp, všechny obrazovky a modály
 - `Vykazovani Mobil.dc.html` — mobilní prototyp
+- `Export Excel.dc.html` — **NOVÉ**, návrh obsahu a formátování exportovaného .xlsx (měsíční a roční výkaz)
 - `ios-frame.jsx` — rám telefonu pro mobilní prototyp (jen prezentace, neimplementovat)
 - `support.js` — runtime prototypu (neimplementovat)

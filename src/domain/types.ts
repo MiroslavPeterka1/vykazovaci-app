@@ -9,6 +9,8 @@ export interface Customer {
   person: string;
   phone: string;
   email: string;
+  /** Volný text k zákazníkovi; u starších dokumentů chybí, čte se jako prázdný. */
+  note: string;
   /** Součty udržuje Cloud Function trigger, klient do nich nezapisuje. */
   totalMinutes: number;
   invoicedMinutes: number;

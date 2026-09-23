@@ -19,5 +19,8 @@ export const countCustomers = (count: number): string =>
 export const countRecords = (count: number): string =>
   withCount(count, 'záznam', 'záznamy', 'záznamů');
 
+export const countActivities = (count: number): string =>
+  withCount(count, 'činnost', 'činnosti', 'činností');
+
 export const countRunning = (count: number): string =>
   withCount(count, 'běžící činnost', 'běžící činnosti', 'běžících činností');

@@ -47,6 +47,8 @@ export function toCustomer(snapshot: QueryDocumentSnapshot | DocumentSnapshot): 
     person: text(data.person),
     phone: text(data.phone),
     email: text(data.email),
+    // Pole přibylo později, starší dokumenty ho nemají — migrace není potřeba.
+    note: text(data.note),
     totalMinutes: count(data.totalMinutes),
     invoicedMinutes: count(data.invoicedMinutes),
   };

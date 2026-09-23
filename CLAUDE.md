@@ -43,12 +43,31 @@ worker generuje `vite-plugin-pwa` při buildu, ve vývojovém režimu se neregis
   `no-cache`. Kdyby se service worker kešoval, prohlížeč by novou verzi nikdy nenašel.
 - Offline funguje samotná aplikace, ne data — Firestore offline persistence zapnutá není.
 
+## Export výkazu do Excelu
+
+Dialog v detailu zákazníka generuje .xlsx přímo v prohlížeči.
+
+- **`src/domain/workReport.ts`** popíše sešit jako čistá data (`reportModel.ts`),
+  **`src/export/writeWorkbook.ts`** ho teprve zapíše ExcelJS. Důvod: vzorce se odkazují na
+  konkrétní čísla řádků a posun by se projevil až v Excelu u uživatele. Testy proto
+  vygenerovaný soubor znovu načtou a ověří konkrétní buňky.
+- **ExcelJS se načítá dynamickým importem** (256 kB gzip) a je vyřazený z offline cache
+  service workeru — export potřebuje data z Firestore, takže bez sítě neproběhne tak jako tak.
+- **Vzorce se do xlsx ukládají s čárkou** jako oddělovačem argumentů, i když je Excel českému
+  uživateli ukáže se středníkem. Se středníkem by soubor nešel otevřít.
+- **Doba se počítá z absolutních okamžiků.** Vzorec `Konec − Začátek` pracuje s nástěnným
+  časem, takže u činnosti přes změnu času dá jinou hodnotu — v takovém řádku se vzorec
+  vynechá a zapíše se rovnou správné číslo.
+- **ExcelJS ukládá `Date` podle UTC složek.** Aby buňka ukázala pražský čas, předává se datum,
+  jehož UTC složky odpovídají pražskému nástěnnému času (`asSpreadsheetDate`).
+
 ## Zdroj designu (přečíst před implementací UI)
 
 Složka [design_handoff_vykazovani/](design_handoff_vykazovani/) je **vizuální zdroj pravdy**:
 
 - `Vykazovani.dc.html` — desktopový prototyp, všechny obrazovky a modály
 - `Vykazovani Mobil.dc.html` — mobilní prototyp
+- `Export Excel.dc.html` — návrh obsahu a formátování exportovaného .xlsx
 - `README.md` — mapování na MUI komponenty, design tokeny, popis obrazovek a chování
 - `support.js`, `ios-frame.jsx` — runtime prototypu, **neimplementovat**
 

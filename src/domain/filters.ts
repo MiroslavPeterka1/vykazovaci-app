@@ -56,6 +56,7 @@ function customerHaystack(customer: Customer): string {
     customer.person,
     customer.phone,
     customer.email,
+    customer.note,
   ].join(' ');
 }
 

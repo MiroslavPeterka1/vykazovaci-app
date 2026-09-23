@@ -9,7 +9,7 @@ import {
   updateProfile,
   type User,
 } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc, Timestamp, updateDoc } from 'firebase/firestore';
 
 import { TERMS_VERSION } from '../content/terms';
 import type { UserProfile } from '../domain/types';
@@ -20,24 +20,46 @@ export function userProfileRef(uid: string) {
 }
 
 /**
- * Založí profilový dokument, pokud ještě neexistuje.
+ * Založí profilový dokument, pokud ještě neexistuje, a doplní chybějící jméno.
  *
  * U registrace e-mailem souhlas s podmínkami potvrzuje zaškrtávátko ve formuláři,
  * u Google přihlášení věta „Pokračováním souhlasíte…“ pod kartou — v obou případech
  * se čas souhlasu a verze podmínek ukládají sem.
+ *
+ * Doplnění jména tu není navíc: profil může vzniknout dřív, než mu registrace
+ * stihne jméno předat. AuthProvider ho zakládá hned, jak Firebase ohlásí
+ * přihlášení, a to nastane už při vytvoření účtu — tedy dřív, než se jméno
+ * uloží. Bez téhle opravy by profil zůstal bez jména.
  */
 export async function ensureUserProfile(user: User, displayName?: string): Promise<void> {
   const ref = userProfileRef(user.uid);
   const existing = await getDoc(ref);
-  if (existing.exists()) return;
+  const wanted = (displayName ?? user.displayName ?? '').trim();
 
-  await setDoc(ref, {
-    displayName: displayName ?? user.displayName ?? '',
-    email: user.email ?? '',
-    termsAcceptedAt: serverTimestamp(),
-    termsVersion: TERMS_VERSION,
-    createdAt: serverTimestamp(),
-  });
+  if (!existing.exists()) {
+    // Zápis je slučovací a jméno do něj jde jen tehdy, když ho známe.
+    // Obě volání — registrace i doplnění z AuthProvideru — mohou dojít
+    // k závěru, že dokument chybí, a založit ho. Kdyby to bylo přepisem,
+    // vyhrálo by poslední, a to je zrovna to bez jména.
+    await setDoc(
+      ref,
+      {
+        ...(wanted ? { displayName: wanted } : {}),
+        email: user.email ?? '',
+        termsAcceptedAt: serverTimestamp(),
+        termsVersion: TERMS_VERSION,
+        createdAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+    return;
+  }
+
+  const current = existing.data().displayName;
+  const missing = typeof current !== 'string' || current.trim() === '';
+  if (wanted && missing) {
+    await updateDoc(ref, { displayName: wanted, updatedAt: serverTimestamp() });
+  }
 }
 
 export async function loadUserProfile(uid: string): Promise<UserProfile | null> {

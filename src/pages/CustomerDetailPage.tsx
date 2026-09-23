@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import EditIcon from '@mui/icons-material/Edit';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -17,6 +18,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ActivityDialog } from '../components/ActivityDialog';
 import { ConfirmPhraseDialog } from '../components/ConfirmPhraseDialog';
 import { CustomerDialog } from '../components/CustomerDialog';
+import { ExportReportDialog } from '../components/ExportReportDialog';
 import { InvoiceDialog } from '../components/InvoiceDialog';
 import { InvoicedChip } from '../components/InvoicedChip';
 import { MonoText, RecordList, type Column } from '../components/RecordList';
@@ -31,6 +33,7 @@ import {
   updateActivity,
 } from '../data/activityMutations';
 import { deleteCustomerCascade, updateCustomer } from '../data/customerMutations';
+import { loadActivitiesForPeriod } from '../data/reportActivities';
 import { useAuth } from '../data/useAuth';
 import { useCustomerActivities } from '../data/useCustomerActivities';
 import { useCustomers } from '../data/useCustomers';
@@ -45,7 +48,7 @@ import {
 } from '../domain/filters';
 import { countRecords } from '../domain/plural';
 import type { ActivityFormValues, CustomerFormValues } from '../domain/schemas';
-import { formatDate, formatDateTime } from '../domain/time';
+import { formatDate, formatDateTime, toWallClock } from '../domain/time';
 import { customerTotals } from '../domain/totals';
 import type { Activity, Customer } from '../domain/types';
 import { layout, monoFontFamily } from '../theme';
@@ -54,7 +57,7 @@ const ACTIVITY_PAGE_SIZE = 10;
 
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const notify = useSnackbar();
   const theme = useTheme();
@@ -74,12 +77,30 @@ export function CustomerDetailPage() {
     activities.find((item) => item.id === searchParams.get('cinnost')) ?? null;
   const [creatingActivity, setCreatingActivity] = useState(false);
   const [invoicing, setInvoicing] = useState<Activity | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [activityFilters, setActivityFilters] = useState<ActivityFilters>(emptyActivityFilters);
   const [activityPage, setActivityPage] = useState(0);
 
   const filteredActivities = useMemo(
     () => filterActivities(activities, activityFilters),
     [activities, activityFilters],
+  );
+
+  // Nabídka roků sahá od nejstarší evidované činnosti po letošek — roky, ve
+  // kterých zákazník nic nemá, by byly jen šum.
+  const exportYears = useMemo(() => {
+    const currentYear = toWallClock(new Date()).year;
+    const oldest = activities.reduce(
+      (min, activity) => Math.min(min, toWallClock(activity.start).year),
+      currentYear,
+    );
+    return Array.from({ length: currentYear - oldest + 1 }, (_, index) => currentYear - index);
+  }, [activities]);
+
+  const loadForPeriod = useCallback(
+    (from: Date, to: Date) =>
+      user && id ? loadActivitiesForPeriod(user.uid, id, from, to) : Promise.resolve([]),
+    [user, id],
   );
 
   usePageTitle(customer?.name ?? null);
@@ -328,6 +349,26 @@ export function CustomerDetailPage() {
                 Zákazník
               </Typography>
             </Box>
+            {isMobile ? (
+              <IconButton
+                aria-label="Výkaz do Excelu"
+                color="success"
+                onClick={() => setExportOpen(true)}
+              >
+                <FileDownloadOutlinedIcon fontSize="small" />
+              </IconButton>
+            ) : (
+              <Button
+                variant="outlined"
+                color="success"
+                size="small"
+                startIcon={<FileDownloadOutlinedIcon />}
+                sx={{ mr: 0.5, height: 36 }}
+                onClick={() => setExportOpen(true)}
+              >
+                Výkaz do Excelu
+              </Button>
+            )}
             <IconButton aria-label="Editovat zákazníka" onClick={() => setEditOpen(true)}>
               <EditIcon fontSize="small" />
             </IconButton>
@@ -358,6 +399,24 @@ export function CustomerDetailPage() {
             <Attribute label="Kontaktní osoba" value={customer.person} inline={isMobile} />
             <Attribute label="Telefon" value={customer.phone} mono inline={isMobile} />
             <Attribute label="E-mail" value={customer.email} inline={isMobile} />
+          </Box>
+
+          <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.08)', px: 3, pt: 1.5, pb: 2 }}>
+            <Typography variant="caption" color="text.secondary" component="div">
+              Poznámka
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 14,
+                lineHeight: 1.55,
+                // Poznámka je víceřádkový volný text, zalomení uživatele se zachovají.
+                whiteSpace: 'pre-line',
+                color: customer.note ? 'text.primary' : 'rgba(0,0,0,0.45)',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {customer.note || 'Bez poznámky'}
+            </Typography>
           </Box>
         </Paper>
 
@@ -476,6 +535,17 @@ export function CustomerDetailPage() {
         busy={busy}
       />
 
+      <ExportReportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        customer={customer}
+        authorName={profile?.displayName || user?.displayName || ''}
+        authorEmail={user?.email ?? ''}
+        loadActivities={loadForPeriod}
+        onDownloaded={(fileName) => notify(`Staženo: ${fileName}`)}
+        years={exportYears}
+      />
+
       <ConfirmPhraseDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -499,6 +569,7 @@ function toFormValues(customer: Customer): CustomerFormValues {
     person: customer.person,
     phone: customer.phone,
     email: customer.email,
+    note: customer.note,
   };
 }
 

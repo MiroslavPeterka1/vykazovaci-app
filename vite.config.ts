@@ -46,6 +46,10 @@ export default defineConfig({
           // potřeby se stáhnou, jen se nepředávají do offline cache.
           '**/*-{cyrillic,greek,vietnamese,math,symbols}-*.woff2',
           '**/*.woff',
+          // ExcelJS má přes 900 kB a načítá se až při stahování výkazu. Do
+          // offline cache nepatří — export si stejně žádá data z Firestore,
+          // takže bez sítě neproběhne tak jako tak.
+          '**/exceljs*.js',
         ],
         navigateFallback: '/index.html',
         // Firebase Hosting si drží /__/* pro vlastní potřeby (mimo jiné

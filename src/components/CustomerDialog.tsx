@@ -79,6 +79,13 @@ export function CustomerDialog({ open, onClose, onSubmit, initial, busy }: Custo
           helperText={formState.errors.email?.message}
           {...register('email')}
         />
+        <TextField
+          label="Poznámka"
+          multiline
+          rows={3}
+          sx={{ gridColumn: { sm: 'span 2' } }}
+          {...register('note')}
+        />
       </Box>
     </ResponsiveDialog>
   );
