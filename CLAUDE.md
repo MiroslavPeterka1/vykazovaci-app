@@ -4,7 +4,7 @@ Tento soubor je vodítko pro Claude Code (claude.ai/code) při práci v tomto re
 
 ## Co tohle repo je
 
-**Výkazy práce** — webová aplikace pro evidenci zákazníků a vykazování odpracované doby.
+**Vykazovátko** (původně Výkazy práce) — webová aplikace pro evidenci zákazníků a vykazování odpracované doby.
 Víceuživatelská, každý uživatel vidí a spravuje **pouze svoje** záznamy. Veřejně dostupná,
 registrace otevřená komukoli. Veškeré texty jsou **česky**.
 
@@ -42,6 +42,18 @@ worker generuje `vite-plugin-pwa` při buildu, ve vývojovém režimu se neregis
 - `sw.js`, `registerSW.js`, `index.html` a manifest mají v `firebase.json` nastavené
   `no-cache`. Kdyby se service worker kešoval, prohlížeč by novou verzi nikdy nenašel.
 - Offline funguje samotná aplikace, ne data — Firestore offline persistence zapnutá není.
+
+## Landing page
+
+Prezentační web v [landing/](landing/) (podrobnosti v [landing/README.md](landing/README.md)).
+Čisté HTML + CSS bez JavaScriptu, nasazuje se na Cloudflare Workers nezávisle na Firebase.
+
+- Je to jediná indexovaná stránka: aplikace má `noindex`. Tlačítka vedou na
+  `/prihlaseni?registrace`, které otevře rovnou záložku Registrace.
+- Absolutní adresa webu je v souborech jako `__SITE_URL__` a dosazuje ji `landing/build.sh`
+  z proměnné buildu (`SITE_URL=https://vykazovatko.online`).
+- Fonty jsou self-hostované (žádné Google Fonts), měření je Cloudflare Web Analytics bez cookies.
+- Texty slibů na landingu musí sedět s `src/content/terms.ts` a `privacy.ts`.
 
 ## Export výkazu do Excelu
 

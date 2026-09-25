@@ -23,7 +23,7 @@ export function BrandMark({ size = 36, title = true }: { size?: number; title?: 
       </Box>
       {title && (
         <Typography sx={{ fontSize: size < 36 ? 16 : 20, fontWeight: 500, letterSpacing: '.15px' }}>
-          Výkazy práce
+          Vykazovátko
         </Typography>
       )}
     </Box>

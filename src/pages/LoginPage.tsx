@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Link as RouterLink, Navigate } from 'react-router-dom';
+import { Link as RouterLink, Navigate, useSearchParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -39,7 +39,10 @@ type Mode = 'login' | 'register';
 
 export function LoginPage() {
   const { user, loading } = useAuth();
-  const [mode, setMode] = useState<Mode>('login');
+  // Landing page odkazuje na `/prihlaseni?registrace`, aby nový uživatel nemusel
+  // hledat záložku Registrace.
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<Mode>(searchParams.has('registrace') ? 'register' : 'login');
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

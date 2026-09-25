@@ -12,8 +12,8 @@ export default defineConfig({
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
         id: '/',
-        name: 'Výkazy práce',
-        short_name: 'Výkazy',
+        name: 'Vykazovátko',
+        short_name: 'Vykazovátko',
         description: 'Evidence zákazníků a vykazování odpracované doby',
         lang: 'cs',
         // Nainstalovaná aplikace se otevírá rovnou na Přehledu; nepřihlášeného

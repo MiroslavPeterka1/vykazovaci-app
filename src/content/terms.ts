@@ -11,14 +11,14 @@ export interface TermsSection {
 }
 
 /** Zvyšuje se při každé změně textu; ukládá se k souhlasu uživatele. */
-export const TERMS_VERSION = '2026-09-22';
+export const TERMS_VERSION = '2026-09-23';
 
-export const TERMS_EFFECTIVE_FROM = '22. 9. 2026';
+export const TERMS_EFFECTIVE_FROM = '23. 9. 2026';
 
 export const termsSections: TermsSection[] = [
   {
     heading: '1. Kdo službu provozuje',
-    body: 'Aplikaci Výkazy práce (dále „služba“) provozuje Miroslav Peterka, kontakt: miroslav.peterka1@seznam.cz. Služba slouží k evidenci zákazníků a k vykazování odpracované doby. Je poskytována bezplatně a nejde o podnikatelskou činnost — provozovatel ji nabízí jako volně dostupný nástroj.',
+    body: 'Aplikaci Vykazovátko (dále „služba“) provozuje Miroslav Peterka, kontakt: miroslav.peterka1@seznam.cz. Služba slouží k evidenci zákazníků a k vykazování odpracované doby. Je poskytována bezplatně a nejde o podnikatelskou činnost — provozovatel ji nabízí jako volně dostupný nástroj.',
   },
   {
     heading: '2. Registrace a účet',

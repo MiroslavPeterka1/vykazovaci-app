@@ -66,7 +66,7 @@ function toWritable(cell: ReportCell): WritableCell {
 export async function buildXlsx(workbook: ReportWorkbook): Promise<Blob> {
   const ExcelJS = await import('exceljs');
   const book = new ExcelJS.Workbook();
-  book.creator = 'Výkazy práce';
+  book.creator = 'Vykazovátko';
   book.created = new Date();
 
   for (const sheetSpec of workbook.sheets) {

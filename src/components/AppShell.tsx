@@ -253,7 +253,7 @@ function AppFooter() {
         color: 'text.secondary',
       }}
     >
-      <span>© {new Date().getFullYear()} Výkazy práce</span>
+      <span>© {new Date().getFullYear()} Vykazovátko</span>
       <Link component={RouterLink} to="/podminky" variant="body2">
         Podmínky použití
       </Link>

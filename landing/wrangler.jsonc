@@ -1,0 +1,10 @@
+// Prezentační web Vykazovátka: jen statické soubory, žádný Worker kód.
+// Nasazuje se přes Cloudflare Workers Builds, podrobnosti v README.md.
+{
+  "name": "vykazovatko-web",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
